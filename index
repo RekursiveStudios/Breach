@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Equil</title>
+<meta http-equiv="refresh" content="0; url=./Breach.html">
+<link rel="canonical" href="./Breach.html">
+<script>location.replace('./Breach.html');</script>
+</head>
+<body>
+<p>Redirecting to <a href="./Breach.html">Breach</a>…</p>
+</body>
+</html>
