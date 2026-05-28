@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Breach Deploy</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Breach">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#d4a544">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAj/0lEQVR4nO3deZhddZ3n8c+te+ve2tekkkolZIWwBIIlmwLSIAZplcUeFEXHFpdBZx544ozdY2tPj213q7T9IDjj0o4tNERbUMGFxUhYgkBYEgiEpbJWllpT+37XM3+UhSFkqbp1zv2dc37v1/PkgU5r8jVPqr7v+zvnnisBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC/iJgewGbb1l16o+kZAMC0Vdc9fJvpGWxEAHiMJQ8A+SMOvEMAuIhlDwDeIwrcQQDMAgsfAMwjCPJDAMwACx8A/I8gmB4C4DhY+gAQXMTA0REAR1GIxb9m7ZZbvf49AMDv1t/SfJPXvwch8FYEwCG8WPoseQDInxdxQAxMIgDk3uJn2QOA99yKAttDwOoAcGPxs/QBwBw3YsDWELAyAGaz+Fn4AOBfswkC20LAqgDId/Gz9AEgePKNAVtCwIoAYPEDgL0IgSMLdQDks/hZ+gAQXvnEQFhDILQBMNPlz+IHAHvMNATCGAGhCwAWPwBgumwOgVAFwEyWP4sfADBlJiEQlggIRQCw+AEAbrApBAIfANNd/ix+AMB0TTcEghwBRaYHmA2WPwDAC9PdG0H+xNhAngCw+AEAhRLW04DAnQCw/AEAhRTW04BAnQBM5w+XxQ8A8Mp0TgOCchIQmBMAlj8AwLTp7JmgnAT4/gSAI38AgN+E4b4AXwcAr/oBAH4W5EsCvr0EwPIHAPhdkC8J+DIAWP4AgKAIagT4LgBY/gCAoAliBPjqHoDj/eGw+AEAfne8+wL8ck+Ab04AWP4AgDA43r7yy0mALwKA5Q8ACJMgRIDxAGD5AwDCyO8RYDwAjoXlDwAIMj/vMaMBcKz68fMfGgAA03WsfWbyFMBYALD8AQC28GMEGAkA09c9AADwExN7seABwE1/AAAb+e2mQF/dBMjyBwCEmZ/2XEEDgOv+AADb+eV+gIIFAMsfAIBJfoiAggQAN/0BADB9hdibxu8B4NU/AMBGpvef5wHA0T8AAEdm8lKApwHA8gcA4NhMRYDxSwAAAKDwPAsAXv0DADA9Jk4BPAkAlj8AADNT6AjgEgAAABZyPQB49Q8AQH4KeQpQsBMAlj8AAMdXqH3pagDwxD8AALzj5p4tyAkAr/4BAJi+QuxN1wKAV/8AAHjPrX3r+QkAr/4BAJg5r/dnzI1fhFf/AIJs/S3NpkeAx9as3WJ6BFdtW3fpjauue/i22fwargTA0QT51T/fEMIvbN8QAITPmrVbbl1/S/NNXvzas74EwKt/AAAKb7b717N7AIL86h8AAL/wap/OKgB49Q8AgDmz2cOenADw6h8AAPd4sVf5MCAAACyU97sAwnL8z93+ABB+x/peH/R3BOX7lkDXTwA4/gcAwH1u79e8AiAsr/4BAAiDfPayqycAvPoHAMA7bu5ZbgIEAMBCMw4Ajv8BAPCfme5n104AOP4HAMB7bu1bTz8MCACCIOhvA8Mk3tY9MwRAnviGAQAIshldAuD6PwAA/jWTPe3KPQBc/wcAoHDc2Lu8DRAAAAsRAAAAWGjaAXC06woc/wMAUHhH27/TvQ+AEwAAACxEAAAAYCECAAAACxEAAABYaFoBwA2AAAD4z2xuBOQEAAAACxEAAABYiAAAAMBCBAAAABYiAAAAsBABAACAhY4bALwFEAAA/8r3rYCcAAAAYCECAAAACxEAAABYiAAAAMBCBAAAABYiAAAAsBABAACAhQgAAAAsRAAAAGAhAgAAAAsRAAAAWIgAAADAQgQAAAAWIgAAALAQAQAAgIUIAAAALEQAAABgIQIAAAALEQAAAFiIAAAAwEIEAAAAFiIAAACwEAEAAICFCAAAACxEAAAAYCECAAAACxEAAABYiAAAAMBCBAAAABYiAAAAsBABAACAhQgAAAAsRAAAAGAhAgAAAAsRAAAAWIgAAADAQgQAAAAWIgAAALAQAQAAgIUIAAAALEQAAABgIQIAAAALEQAAAFiIAAAAwEIEAAAAFiIAAACwEAEAAICFCAAAACxEAAAAYCECAAAAC8VMD4Dguvfrq1VeEjU9BgxzHCmbc5RzHOVyUi7nKJ1xlMrklEw7SqVzSqZzGpvIanQ8q9GJyR/Do1kNjmY0MJLR4EhGAyNp9QymlUzlTP9PAqxAAACYlUhEikUjkiKu/HojY1kdHEzp4EBKHT0pdfQm1daTVPvBpDp6k8pkHVd+H8B2BAAAX6koi6qirFRLG0vf8v/LZB21HUyqtWNcezrHtXP/uLbvH9XASMbApECwEQAAAiMWjWjx/BItnl+ii1T7xs9396fUsm9Mr+wZ0Us7R7SrfUwOBwXAMREAAAKvoTauhtq4LlxdI0kanchq264RPff6kJ57bUgdvUmzAwI+RAAACJ3ykqjOPa1a555WLUk6cDCpp18e0MatA2rZN2p4OsAfCAAAobdwbkLXXDJP11wyT939KT3+Qr/WP9ervZ0TpkcDjCEAAFiloTb+Rgy07BvVQ8/0asPzfZrg7YewDAEAwForTyjXyhPK9an3N+nBTT369RMH1dWfMj0WUBAEAADrVZRGdc3F8/TBixr0yOY+/fT3nTpwkBsHEW4EAAD8UbQoovecXa93v71Oj2zp1+0PtKubEwGEFJ8FAACHKSqK6NKz6vRvf3Oqrn//ApUmeOQ1wocAAICjiMeKdO275+tHXzpV559eY3ocwFUEAAAcx5zqYv3d9cv0v69fppoKrpwiHAgAAJimd55eox/81Sk6++Qq06MAs0YAAMAM1FYW6x8+u0LXv3+BIu58ACJgBAEAADMUiUjXvnu+/uEzK1Rewg2CCCYCAADydPYpVfr2TSs1p7rY9CjAjHE3C/J29Ze2FvT3+/U3z1RJPLzN+v37DuiXj3e79uvFopE3/4hN/rMsEVVlWUyVZVFVlP3p3xtqJj9Rb35dQvXVxRxvT9Pi+SW65aaV+tL3dvDwIAQKAQCEVCbrKJN18vrvxqIRNdTG1TQ3oRVNZVqxsEzLm0rVWJ8gDI5gXm1c3/pvJ+kL39mu9h4iAMFAAAB4i0zWUXtPUu09ST332tAbP1+aiOrUJeVqXlmp5pOqtGxBKUHwR3VVxbr58yfqC9/ZztMDEQgEAIBpG09mtbllSJtbhiS1qboiprNOrtIlzXV6+8pKFRXZXQMNtXF9/YYVuvGWFo1OZE2PAxwTAQAgb4MjGW14vk8bnu9TbWWxLm6u1Zpz6rVsQanp0YxZ1FCiL39iqb7yw13K5fK7BAMUQnjvqAJQUP3Daf3y8W7d8M+v6cs/2Kltu0dMj2TMWSdX6fr3LTA9BnBMnAAAcN1zrw/pudeHdMbyCl3/viadurTc9EgFd83F87Rl+7C2tAwd/z8MGMAJAADPvLRrRGu/06Lv/Hy/ddfEIxHpr65brKpyXmfBnwgAAJ5yHOk3Tx7Up7/x6pveUWCDuspifeaKJtNjAEdEAAAoiN7BtL7yw536+WNdpkcpqMvOqdcZyytMjwG8BQEAoGAcR/rXX7XpX/5jb94PKQqiz129iOclwHcIAAAF97tnenXzulY5ljTA8qZSXdxcZ3oM4E0IAABGPPZCv757737TYxTMJy5vtP5BSfAXAgCAMb964qDufsSOewIa6xO64Iwa02MAbyAAABh1+wPt2rF/zPQYBXHNxQ2mRwDeQAAAMCqTdXTzT1qVyuRMj+K5lSeUa8XCMtNjAJIIAAA+sLdzQnc91Gl6jIK47Jx60yMAkggAAD5x78Zu9Q2nTY/huUveXqtYlJsBYR4BAMAXkumc7t4Q/hsCK8tiOmNFpekxAAIAgH/89ske9Q2F/xTgnauqTY8AEAAA/COVyenh5/tMj+G5804jAGAeAQDAVzZYEAANtXHNq4ubHgOWIwAA+MqejnHt6Rg3PYbn+IAgmEYAAPCdjS8OmB7Bc6cuIQBgFgEAwHde3jVsegTPLW8qNT0CLEcAAPCdln1jof+44KWNpXxEMIwiAAD4TjKd044D4f58gES8SI31CdNjwGIx0wOYtmbtFtMjADiCln1jOmVxuekxPDW/Lq72nqTpMUKD7+czwwkAAF/q7A3/YpxXxwkAzCEAAPiSDQHQUFtsegRYjAAA4EsdvSnTI3iuqtz6q7AwiAAA4Evd/RYEQBkBAHMIAAC+NJbMmh7Bc5VlUdMjwGIEAABfcpzJDwcKs3gx34JhDn/7APhWMhXuACiO8S0Y5vC3D4BvTYQ+AHgUIMwhAAD4lhPupwErF/b/gfA1AgCAb5XEw/0taiIZ7hMO+Fu4v7oABFoi5AEwTgDAoHB/dQEIrEhESoT8LvlxC97qCP8K91cXgMAqiYf/PfKcAMAkAgCAL82ri5sewXPdA+F/2iH8iwAA4EsL6sMfAG0Hw/+BR/AvAgCAL82vD/9H5RIAMIkAAOBLjTYEQM+E6RFgMQIAgC+tPKHM9Aie6hlMa2SMdwHAHAIAgO8k4kVasTDcAbB1x7DpEWA5AgCA75y6pFyxaLifk//iTgIAZhEAAHzn9GUVpkfw3FYCAIYRAAB858LVtaZH8FR7T1KdvTwDAGYRAAB85aRFZVo8v8T0GJ56+Pk+0yMABAAAf7n0rDrTI3jKcaTfP9tregyAAADgH4l4kS5uDncAvLhjWF39HP/DPAIAgG9cccFcVVfETI/hqfuf7jE9AiCJAADgE6WJqD50yTzTY3hqT8e4ntjab3oMQBIBAMAnPnhRg6rLw/3q/44H2uU4pqcAJhEAAIw7YV6JPvKecL/6b9k3qqe2DZoeA3gDAQDAqFg0or++bonisfB+O3Ic6Xv3HTA9BvAm4f2KAxAIH7usUScuCvdz/+95tEuv7hk1PQbwJgQAAGPefVadPnLpfNNjeKq1Y1x3PNhuegzgLQgAAEacfXKV/vu1ixUJ8Wf+pDOObl63V+kMd/7BfwgAAAV3xvIK/e0nl4X6E/8cR/rnn7RqZ9uY6VGAIwr3e24A+M57zq7T2g8vDvXyl6R/u79Nj73Ae/7hXwQAgIKIRKRPXL5AH31PuK/5S9L9T/XoZxu6TI8BHBMBAMBzC+Yk9IVrF+uM5RWmR/Hcb5/q0Xd+vs/0GMBxEQAAPBOJTD7h7y//fIESxeG/5egn6zt1O3f8IyAIAACui0Sk80+v0cff26iljaWmx/Hc1IN+7tvYbXoUYNoIAACuiUSkd5xWrY+/d4GWN4V/8UvSwEhG37irVVtahkyPAswIAQBg1hpq41pzTr0uO6de8+ripscpmBd3DOsbd7aqbzhtehRgxggAAHmZU12ss06p0rtW1+rtK6tC/UCfw6Uzjtat79BPH+7k0/0QWAQAgGkpK4lq5Qllaj6pSmefUqVlC+w44j/cc68P6f/+Yr/ae5KmRwFmhQAA8CaRiDSnOq4FcxJa3lSqkxaV6aRFZWqaW2LVq/zDdfen9P37DugPLw2YHgVwBQEAhFQsGnnzj1hExdEilZdGVVUeU1XZ5D+ry2OqqYxpfl1CjfVxzatLqDhm8aY/TO9gWvc82qX7n+pRMp0zPQ7gGgIA8IkbrlqoG65aaHoM/FFXf0p3b+jSQ8/08GE+CCUCAAAO8fKuEd3/dI82vtivTJbFj/AiAABYr384rd8/16cHN/Wo7SA398EOBAAAK/UPp7XplUE9+dKgNrcMKZvj1T7sQgAAsMa+rgltemVQT20b0Guto7yHH1YjAACEkuNIrZ3jennXyBs/eGIf8CcEAIDAy+UctfUktbttXLvax7WrbUyvtY5qZDxrejTAtwgAAIExMJJRR29Snb0pdfQm1dGT1J6OcbV2TCiV4T36wEwQAAB878DBpF7aOax9XRPq7k+pqz+l7v6UBkcypkcDAosAAOB7C+cmtHBu4i0/n0zndLA/pf3dSbV2jmtP+7j2dIyr7WCS9/ADx0EAAAisRHGRFjaUaGFDid6xqvqNn89kHe3vnlBrx4R2t49p2+5Rbd8/yhP9gEMQAABCJxaNaGljqZY2luri5lpJkx/h27JvVNt2j+jl3SN6dc+oRie4SRD2IgAAWKE4FtGqZRVataxC12rybYK72sb09CuDevrlQe1sGzM9IlBQBAAAK0Ui0oqFZVqxsEwfv6xRBwdSeurlQT29bUAv7RrhHgKEHgEAAJLm1sR15YVzdeWFczU6kdUTLw7owU09em3vqOnRAE8QAABwmPKSqN57Xr3ee169WjvG9eCmXj38fJ+Gx3jbIcKDAACAY1jSWKrPXb1Qn/5Ak/7w0oDu29jNqQBCgQAAgGkojkV0cXOtLm6u1ZaWId21vlPbdo+YHgvIGwEA+MT37zugXz7e7eqvGYlIxdEiFccif/zxp38vS0RVWxlTTWWxaipikz8qi1VXVayFDQnVVRa7OkuYNK+sUvPKKm3dOax16zv14o5h0yMBM0YAACHmOFIqk1Mqj0vX5SVRLZpXokUNJVrUkNDSBaU6bUmFKsqi7g8aUKtXVGr1ikpt2z2i7/7yAG8lRKAQAACOaHQiq9f3jur1Q653RyLSkvmlWrWsQqctK9fpyyo0tyZucEp/WLWsQv/nCyv126d6dPsD7XwKIQKBAAAwbY4j7emYfN7+b548KEk6aVGZLlxdqwtX12jBnLc+r98WRUURXXHBXL3rzFr98NcH9Pvn+kyPBBwTAQBgVrbvH9P2/WP60W/btKKpTBe9rVaXn1evqnI7v73UVMT0xY8u0XvPnaOb17Wqqz9leiTgiIpMDwAgPHa2TYbAdV/dplvv2ad9XROmRzLm9OUV+t4XT9H5p9eYHgU4IgIAgOuS6Zzuf6pHn/nmq/ryv+5Uyz473zdfURrV312/TJ+/eqFi0YjpcYA3IQAAeMZxpOdeG9KN327Rt366V31DadMjGXHVuxr07ZtWqrHe3nsk4D8EAADPOY60/tleffKfXtHPNnRZ+UE7Jy0q021rV+rUpeWmRwEkEQAACmg8mdOPftumtbe1qLPXvpvjqstjuvnzJ+qCM2pMjwIQAAAKr2XfmD73rdf0xNYB06MUXDxWpK98YqkuPavO9CiwHAEAwIjRiay+dvtufe/eA3IsuyJQVBTRFz+6RJedW296FFiMAABg1L0bu/XNda3K5eyqgEhE+sKHF+uiM2tNjwJLEQAAjHtkc5/+8d/3WHdzYCQi/fXHlqh5ZZXpUWAhAgCALzyxdUBf/fFuZS07CYhFI/rbv1yqRQ0lpkeBZQgAAL7xzCuD+sGv2kyPUXDlJVH9/aeXq6KUT1pE4RAAAHzlvo3dWv9sr+kxCq5pbkJrP7zY9BiwCAEAwHduvWeflY8PvnB1jT5w/lzTY8ASBAAA30lnHP3jv+9RMp0zPUrBffaKJs2vj5seAxYgAAD4UmdvSj/9fafpMQouES/S2g9xKQDeIwAA+Nbdj3Rpf7d9Hyn8tpMqdUkzTwqEtwgAAL6VyTq67Z79pscw4lMfWKBEMd+i4R3+dgHwta07h/XC9mHTYxTc3Jq4rr6owfQYCDECAIDv3f1Il+kRjPhPf9ag0gTfpuEN/mYB8L3NLUPa3T5ueoyCqyqP6YoLeFsgvEEAAAiEex618xTgygsbFC2KmB4DIUQAAAiEx1/o18h41vQYBTenuljvPL3a9BgIIQIAQCBkso6e3jZoegwj3veOOaZHQAgRAAAC44mt/aZHMOLMEytVV1lsegyEDAEAIDA2twxpPGnfZYCiooguelut6TEQMgQAgMBIZxw98+qQ6TGM4D4AuI0AABAo23aPmB7BiNOWVqisJGp6DIQIAQAgUF7fa9/HBEtSLBrRmSdWmh4DIUIAAAiU3e3jSmXs+5hgSVq1rNz0CAgRAgBAoGSyjnbut++pgNLkZQDALQQAgMB5fZ+dlwFWNJXxVEC4hgAAEDidvUnTIxhRHIuoaW7C9BgICQIAQOB09adMj2DM0sZS0yMgJAgAAIHT1WdvADTO4QQA7iAAAARO94C9ATCvNm56BIQEAQAgcEbGslY+EliSGuoIALiDAAAQSMNjdgZATXnM9AgICQIAQCAl03Y+DKiyjACAOwgAAIFkawBUlPF5AHAHAQAgkJIpOwMgXsyDgOAOAgBAINkaAMVRvm3DHfxNAhBIqYxjegQjIpHJH8BsEQAAAikes3MLOs7kD2C2CAAAgRQvtvPbVzpr56UPuM/OryAAgVcSt/PbV8bSSx9wn51fQQACL2FpANh67wPcZ+dXEIDAs/USwMhYxvQICAk7v4IABF5lqZ0PxBkatfMRyHAfAQAgcCpKoyorsTQAOAGASwgAAIHTYPFH4g4MEwBwBwEAIHDmWfyRuF39KdMjICQIAACBM8/iE4DOvqTpERASBACAwGmckzA9gjFdfZwAwB0EAIDAWXlCuekRjDnQPWF6BIQEAQAgUGLRiFYsLDU9hhF9Q2kNjHATINxBAAAIlOVNpYrH7PzWtat93PQICBE7v4oABNYpi+09/t/VNmZ6BIQIAQAgUE5fXml6BGNe2TNqegSECAEAIDAS8SKdc0qV6TGMyOUcbds1YnoMhAgBACAwzjmlytpPAdzVNq7RCT4HAO6x8ysJQCC9a3Wt6RGM2bJ92PQICBkCAEAgJIqLdM6p1abHMObJlwdMj4CQiZkewKT1tzTn9d9bs3aLy5MAOJ4159SrNGHna5bewbRa9nED4LHw/Xzm7PxqAhAoRUUR/cWfNZgew5gnXx6Q45ieAmFDAADwvQvPqNECi5///7tne02PgBAiAAD43ocumWd6BGN2t49rx34eAAT3EQAAfO3Ss+p04qIy02MY8+CmHtMjIKQIAAC+VVkW03+5cqHpMYwZGctqPcf/8AgBAMC3PvOBJlVX2PtmpV/9oVvjyZzpMRBSBAAAX1q9olKXnVtvegxjkqmc7tt40PQYCDECAIDvNNTG9eVPLFUkYnoSc37xeLcGRzOmx0CIEQAAfCURL9JXP7VcNRYf/fcPp/WzDV2mx0DIEQAAfCMSkf7HRxZreVOp6VGMuuPBDo0n+eAfeMvexAbgK0VFEa390Am66Ex7P/BHkl7dM8pb/1AQBAAA42LRiP7nx5boXZYv/3TG0b/8x14e+4uCIAAAGJWIF+l/fXKZzj65yvQoxt35UIf2d0+YHgOWIAAAGLO0sVR/85+XavH8EtOjGLelZUg/e6TT9BiwCAEAwIgrLpirz17ZpHiMe5F7B9P6+l2tHP2joAgAAAU1rzau//oXi3TeadWmR/GFVCanr92+W4MjvOcfhUUAACiI8pKorr10vj54UYOKYxY/4ecQjiPdvG6vXm0dNT0KLEQAAPBUPFaky99Rr49d1qjqcr7lHOr//aZNG1/sNz0GLMVXIwBPNNTG9f7z5+jy8+aw+I/gzoc6dM+jPO0P5vBVCcA1sWhEZ55YqT9/xxy9c1W1ioo46j+SOx/q0J2/6zA9BixHAACYldJEkc46uUrnn1Gjc0+tVnlJ1PRIvuU4k8f+vPKHHxAAAGakrCSqkxeX67Ql5TptablOX17JTX3TkM44uvknrXr8Ba75wx8IAABHVFQU0fy6uJrmJrRwbokWzy/RKUvKtWR+qdUf05uPvuG0vvbjPXplz4jpUYA3EABAyMWiERXHilQci6g4Fnnj/y5NFKm6PKbqipiqy2OqqYypprxYtZUxNc1NaH59QrEom362Xto1on+6Y4/6htOmRwHehABA3u79+mqu97rohqsW6oarFpoeAy5xHOlnGzp1+4MdyuV4xB/8hwAAAJcdOJjUt37SygN+4GsEAAC4JJtzdO/Gbt3xQIeS6ZzpcYBjIgAAwAUvbB/Wd+/dr72dfJwvgoEAAIBZONA9oR8/0K4ntg6YHgWYEQIAAPLQ0ZvUXb/r1IbNfdzkh0AiAABgBvZ0jOsXj3Xrkc19ymRZ/AguAgAAjsNxpC3bh/SLx7r1/OtDpscBXEEAAMBR9A2ntf7ZXj20qVftPUnT4wCuIgAA4BDJVE6bXh3Uo5v79MyrQ8pyfR8hRQAAsN5EKqfNLUN6/IV+bXplUBMp3sOP8CMAAFipqz+lZ18d1KZXBvXijmGlM7zSh10IAABWGBjJaOvOYb24Y1hbdwzrwEGu6cNuBACA0MnlHLV2Tuj1vaN6be+oXmsd1b4untAHHIoAABBoyXROrR0T2t0+pt3t49rVNq5dbWMaT3IdHzgWAgCA7zmO1DuYVntvUge6J7S/e0IHupPa3z2hzr4UT+ID8kAAADAql3M0MJJR31BavUPpyX8OptU9kFJX3+SP7v4UT90DXEYAADgmx5Ecx1HOkXKOIycn5Rwpm3WUyuaUTjtKZ3JKZSb/mUw7Gp/IajyV09hEVuPJnMaSWY2OZzU8ltXwWEZDYxkNjWY1PDr57w67HSg4AgB5u/pLW02PAADIU5HpAQAAQOERAAAAWIgAAADAQgQAAAAWIgAAALAQAQAAgIUIAAAALEQAAABgIQIAAAALEQAAAFiIAAAAwEIEAAAAFiIAAACwEAEAAICFCAAAACxEAAAAYCECAAAACxEAAABYiAAAAMBCBAAAABYiAAAAsBABAACAhQgAAAAsRAAAAGAhAgAAAAsRAAAAWIgAAADAQgQAAAAWIgAAALAQAQAAgIUIAAAALEQAAABgIQIAAAALEQAAAFiIAAAAwEIEAAAAFiIAAACwEAEAAICFCAAAACxEAAAAYCECAAAACxEAAABYiAAAAMBCBAAAABYiAAAAsBABAACAhQgAAAAsRAAAAGAhAgAAAAsRAAAAWIgAAADAQgQAAAAWOm4ArLru4duO9PPrb2m+yf1xAADATBxtHx9tf0/hBAAAAAsRAAAAWIgAAADAQgQAAAAWIgAAALAQAQAAgIWmFQC8FRAAAP/J9y2AEicAAABYiQAAAMBCBAAAABYiAAAAsNC0A4AbAQEA8I/Z3AAocQIAAICVCAAAACzkSgBwGQAAgMJxY+/OKACme10BAAAU3kz2dMzLQQAgCNbf0mx6BKDgCIA88M0iHNas3WJ6BAAwxrWbALkPAAAA77m1b2ccANwHAACA/8x0P/M2QAAALORqAHAZAAAA77i5Z/MKAC4DAADgH/nsZdcvAXAKAACA+9zer3m/DXDVdQ/ftm3dpTe6OUyhHettYLzVDwDCI8xv+833VJ6bAAEAsJAnAcBlAAAA3OPFXp1VAHAzIAAA5sxmD3t2CYBTAAAAZs+rfTrrAOAUAACAwpvt/vX0w4DW39J805q1W2718vcAgNkK8x3iCDYvT9NdCYAwvCXwcHxDAAD4lRun756/DZB7AQAAmDmv96drAcC9AAAAeM+tfVuQBwFxCgAAwPQVYm+6GgCcAgAA4B0392zBHgXMKQAAAMdXqH3pegAcq06IAAAAju5Ye9LtU3Y+DAgAAAt5EgCcAgAAMDOFfPUveXgCQAQAADA9hV7+EpcAAACwkqcBwCkAAADHZuLVv1SAEwAiAACAIzO1/CUfXAIgAgAANjK9/woSADwhEACA6SvE3izYCQCXAgAAmGTy6H9KQS8BEAEAANv5YflLPrgH4FBEAAAgzPy05woeAMerGz/94QAA4Jbj7bdC3y9n5ASAmwIBAPgTE3vR2CUA7gcAANjCL9f9D2X0HgAiAAAQdn5c/pLPbgI8HBEAAAgyP+8x4wHATYEAgDDy201/hzMeABIRAAAIF78vf8knASARAQCAcAjC8pekiOkBDrdt3aU3Hu8/s2btllsLMQsAANM1nReqfln+ko9OAKZM5w+H0wAAgJ8EbflLPgwAiQgAAARHEJe/5NMAkIgAAID/BXX5Sz68B+Bw07knQOK+AABA4Uz3Bahfl78UgACYws2BAAA/CPKr/kP59hLA4bgkAAAwLSzLXwrQCcAULgkAAAotDEf+hwvMCcCU6f7hchoAAHBDGJe/FMATgENxGgAA8EpYF/+UwJ0AHIrTAACAF8K+/KWAnwBMme5JgMRpAADg6GbygjHIy18KSQBMIQQAAPmwafFPCVUASDOLAIkQAACbzfQScViWvxTCAJhCCAAAjsbmxT8ltAEgzTwCJEIAAMIsn5vCw7j8pZAHwJR8QkAiBgAgDPJ9J1hYF/8UKwJgCiEAAPZg8R+bVQEwJd8QkIgBAPCz2Tz3xZbFP8XKAJgymxCYQhAAgDluPOjNtsU/xeoAmOJGCEjEAAAUgltPd7V18U8hAA7hVggciigAgPx58Sh32xf/FALgKLyIgcMRBwBQmM9rYem/FQFwHIUIAQCAN1j8R0cAzAAxAAD+x9KfHgJgFggCADCPhZ8fAsBFBAEAeI+F7w4CwGNEAQDkj2XvHQLAIOIAAFjyAAAAAAAAAAAAAAAAAAAAAAAAAAAAh/n/libOI9sDH/AAAAAASUVORK5CYII=">
+<script>
+// Generate PWA manifest as blob URL (works single-file, no external JSON needed)
+(function(){
+  var m=JSON.stringify({
+    name:'Breach Deploy',
+    short_name:'Breach',
+    start_url:'./breach-deploy.html',
+    display:'standalone',
+    background_color:'#1a1612',
+    theme_color:'#d4a544',
+    icons:[{
+      src:"data:image/png;base64,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",
+      sizes:'512x512',
+      type:'image/png',
+      purpose:'any maskable'
+    }]
+  });
+  var b=new Blob([m],{type:'application/json'});
+  var link=document.createElement('link');
+  link.rel='manifest';
+  link.href=URL.createObjectURL(b);
+  document.head.appendChild(link);
+})();
+// Minimal service worker for PWA installability — requires separate sw.js on server
+// If sw.js exists, register it; if not, Add to Home Screen still works via manifest
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(function(){});
+}
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root {
+    --cyan: #d4a544;
+    --magenta: #b8362f;
+    --green: #4ade80;
+    --red: #ff6b6b;
+    --yellow: #ffe250;
+    --bg: #241d14;
+    --bg2: #34291b;
+    --panel: rgba(15,15,15,0.92);
+    --border: rgba(212,165,68,0.28);
+    --border-bright: rgba(212,165,68,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background:
+      radial-gradient(135% 95% at 50% -8%, #46371f 0%, #2e2417 40%, #1d1711 100%);
+    background-attachment: fixed;
+    color: #f4ecd8;
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 40px;
+    overflow-x: hidden;
+  }
+
+  .logo {
+    font-family: 'Cinzel Decorative', 'Cinzel', serif;
+    font-weight: 900;
+    font-size: clamp(40px, 11vw, 64px);
+    letter-spacing: 0.18em;
+    color: #d4a544;
+    text-align: center;
+    margin-bottom: 6px;
+    text-shadow:
+      0 1px 0 #000,
+      0 4px 8px rgba(0,0,0,0.7),
+      0 0 24px rgba(212,165,68,0.35);
+    position: relative;
+    z-index: 1;
+  }
+  .logo::before, .logo::after {
+    content: '';
+    display: inline-block;
+    width: 10px; height: 10px;
+    margin: 0 14px;
+    background:
+      linear-gradient(45deg, transparent 46%, #d4a544 46% 54%, transparent 54%),
+      linear-gradient(-45deg, transparent 46%, #d4a544 46% 54%, transparent 54%);
+    opacity: 0.7;
+    vertical-align: middle;
+  }
+  .subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: #c2ab78;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--cyan);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  label {
+    display: block;
+    font-size: 8px;
+    font-weight: 700;
+    color: rgba(212,165,68,0.8);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    margin-top: 10px;
+  }
+  label:first-of-type { margin-top: 0; }
+
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    outline: none;
+  }
+  input:focus { border-color: rgba(212,165,68,0.4); box-shadow: 0 0 8px rgba(212,165,68,0.15); }
+
+  .token-row { display: flex; gap: 6px; }
+  .token-row input { flex: 1; }
+  .eye-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0 12px;
+    cursor: pointer;
+    font-size: 16px;
+    color: rgba(212,165,68,0.5);
+  }
+
+  .drop-zone {
+    border: 2px dashed var(--border-bright);
+    border-radius: 10px;
+    padding: 24px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--cyan);
+    background: rgba(212,165,68,0.03);
+  }
+  .drop-zone.tapped {
+    border-color: var(--cyan);
+    background: rgba(212,165,68,0.08);
+    box-shadow: 0 0 20px rgba(212,165,68,0.15);
+  }
+  .drop-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    /* Ensure file input is fully interactive on mobile */
+    z-index: 10;
+    font-size: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .drop-icon { font-size: 28px; margin-bottom: 6px; opacity: 0.7; transition: transform 0.15s ease; }
+  .drop-zone.tapped .drop-icon { transform: scale(1.15); }
+  .drop-label { font-size: 10px; color: rgba(212,165,68,0.8); transition: color 0.15s ease; }
+  .drop-zone.tapped .drop-label { color: var(--cyan); }
+  .drop-status {
+    font-size: 9px;
+    color: var(--cyan);
+    margin-top: 6px;
+    min-height: 14px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .drop-status.visible { opacity: 1; }
+  .drop-filename {
+    font-size: 11px; color: var(--green); margin-top: 8px;
+    word-break: break-all;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid var(--cyan);
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--cyan);
+    box-shadow: 0 0 16px rgba(212,165,68,0.2);
+  }
+  .btn:hover:not(:disabled) {
+    background: rgba(212,165,68,0.1);
+    box-shadow: 0 0 24px rgba(212,165,68,0.4);
+  }
+  .btn:disabled {
+    border-color: rgba(212,165,68,0.15);
+    color: rgba(212,165,68,0.2);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: rgba(212,165,68,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 10px;
+    display: none;
+  }
+  .progress-bar.visible { display: block; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+    transition: width 0.3s ease;
+    border-radius: 2px;
+  }
+
+  .log {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 9px;
+    line-height: 1.6;
+    display: none;
+  }
+  .log.visible { display: block; }
+  .log-line { padding: 1px 0; }
+  .log-ok   { color: var(--green); }
+  .log-err  { color: var(--red); }
+  .log-warn { color: var(--yellow); }
+  .log-info { color: var(--cyan); }
+  .log-dim  { color: rgba(212,165,68,0.6); }
+
+  .status-badge {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin-top: 10px;
+  }
+  .status-badge.visible { display: inline-flex; }
+  .status-badge.success { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.3); color: var(--green); }
+  .status-badge.error   { background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); color: var(--red); }
+  .status-badge.working { background: rgba(212,165,68,0.06); border: 1px solid rgba(212,165,68,0.2); color: var(--cyan); }
+
+  .dot-pulse { animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .stats-row {
+    display: none;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .stats-row.visible { display: flex; }
+  .stat {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+  }
+  .stat-num { font-size: 16px; color: var(--cyan); font-weight: 700; }
+  .stat-label { font-size: 7px; color: rgba(212,165,68,0.7); letter-spacing: 1px; margin-top: 2px; }
+
+  .saved-token-hint {
+    font-size: 8px;
+    color: rgba(74,222,128,0.5);
+    margin-top: 6px;
+    display: none;
+  }
+
+  .repo-display {
+    font-size: 10px;
+    color: rgba(212,165,68,0.8);
+    margin-top: 6px;
+    padding: 6px 10px;
+    background: var(--bg);
+    border-radius: 4px;
+    border-left: 2px solid rgba(212,165,68,0.2);
+    display: none;
+  }
+
+  .info-text {
+    font-size: 9px;
+    color: rgba(212,165,68,0.7);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="logo">BREACH</div>
+<div class="subtitle">GitHub Deploy Tool</div>
+
+<div class="card">
+  <div class="card-title">&#9881; Configuration</div>
+
+  <label>GitHub Personal Access Token</label>
+  <div class="token-row">
+    <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+    <button class="eye-btn" id="eyeBtn" onclick="toggleToken()">&#128065;</button>
+  </div>
+  <div class="saved-token-hint" id="savedHint">&#10003; Token saved in browser</div>
+
+  <label>Repository</label>
+  <input type="text" id="repoInput" value="RekursiveStudios/Breach" placeholder="username/reponame">
+
+  <label>Branch</label>
+  <input type="text" id="branchInput" value="main" placeholder="main">
+  <div class="repo-display" id="repoDisplay"></div>
+</div>
+
+<div class="card">
+  <div class="card-title">&#128196; HTML File</div>
+  <div class="drop-zone" id="dropZone">
+    <input type="file" id="fileInput" accept=".html">
+    <div class="drop-icon">&#128196;</div>
+    <div class="drop-label">Tap to select Breach-*.html</div>
+    <div class="drop-status" id="dropStatus"></div>
+    <div class="drop-filename" id="fileName"></div>
+  </div>
+  <div class="info-text">File will be deployed as <strong style="color:var(--cyan)">Breach.html</strong> regardless of version number in filename. <strong style="color:var(--cyan)">index.html</strong> at the repo root is left untouched.</div>
+</div>
+
+<div class="card">
+  <button class="btn" id="deployBtn" onclick="deploy()" disabled>
+    &#128640; Deploy to GitHub
+  </button>
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div style="text-align:center">
+    <div class="status-badge" id="statusBadge"></div>
+  </div>
+  <div class="stats-row" id="statsRow">
+    <div class="stat"><div class="stat-num" id="statPushed">0</div><div class="stat-label">PUSHED</div></div>
+    <div class="stat"><div class="stat-num" id="statSkipped">0</div><div class="stat-label">UNCHANGED</div></div>
+  </div>
+</div>
+
+<div class="card" id="pagesCard" style="display:none">
+  <div class="card-title">&#127760; GitHub Pages Status</div>
+  <div id="pagesStatus" style="text-align:center;padding:10px 0">
+    <div class="status-badge visible working" id="pagesBadge">
+      <span class="dot-pulse">&#9679;</span> Waiting for GitHub Pages...
+    </div>
+  </div>
+  <div style="margin-top:10px">
+    <div style="display:flex;justify-content:space-between;font-size:8px;color:rgba(212,165,68,0.3);margin-bottom:4px">
+      <span>DEPLOY PROGRESS</span>
+      <span id="pagesElapsed">0s</span>
+    </div>
+    <div class="progress-bar visible" style="margin-top:0">
+      <div class="progress-fill" id="pagesProgress" style="width:0%;transition:width 1s linear"></div>
+    </div>
+  </div>
+  <div style="margin-top:12px;text-align:center">
+    <a id="siteLink" href="#" target="_blank" style="
+      display:none;
+      color:#1a1612;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+      letter-spacing:2px;text-decoration:none;padding:12px 24px;
+      background:var(--cyan);border-radius:10px;
+      box-shadow:0 0 20px rgba(212,165,68,0.4);
+    ">&#128640; PLAY BREACH</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">&#128203; Log</div>
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+var htmlFile = null;
+var deploying = false;
+
+window.onload = function() {
+  var saved = localStorage.getItem('breach_token');
+  if (saved) {
+    document.getElementById('tokenInput').value = saved;
+    document.getElementById('savedHint').style.display = 'block';
+  }
+  var savedRepo = localStorage.getItem('breach_repo');
+  if (savedRepo) document.getElementById('repoInput').value = savedRepo;
+  updateRepoDisplay();
+  checkReady();
+};
+
+function toggleToken() {
+  var inp = document.getElementById('tokenInput');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function updateRepoDisplay() {
+  var repo = document.getElementById('repoInput').value.trim();
+  var d = document.getElementById('repoDisplay');
+  if (repo) {
+    d.style.display = 'block';
+    d.textContent = '\u2192 https://github.com/' + repo;
+  }
+}
+
+document.getElementById('tokenInput').addEventListener('input', function() {
+  localStorage.setItem('breach_token', this.value.trim());
+  document.getElementById('savedHint').style.display = this.value ? 'block' : 'none';
+  checkReady();
+});
+document.getElementById('repoInput').addEventListener('input', function() {
+  localStorage.setItem('breach_repo', this.value.trim());
+  updateRepoDisplay();
+  checkReady();
+});
+
+function onFileSelect(input) {
+  var status = document.getElementById('dropStatus');
+  if (input.files.length > 0) {
+    htmlFile = input.files[0];
+    document.getElementById('fileName').textContent = htmlFile.name + ' (' + Math.round(htmlFile.size/1024) + ' KB)';
+    status.textContent = '\u2713 File loaded';
+    status.classList.add('visible');
+    status.style.color = 'var(--green)';
+    checkReady();
+  } else {
+    status.textContent = '';
+    status.classList.remove('visible');
+  }
+}
+
+// Wire up file input change
+document.getElementById('fileInput').addEventListener('change', function() {
+  onFileSelect(this);
+});
+
+// Tap feedback on the drop zone
+(function() {
+  var zone = document.getElementById('dropZone');
+  var fileInput = document.getElementById('fileInput');
+  var status = document.getElementById('dropStatus');
+  var tapTimer = null;
+
+  // Show visual + text feedback on any pointer interaction with the zone
+  function showTapFeedback() {
+    zone.classList.add('tapped');
+    status.textContent = 'Opening file picker\u2026';
+    status.style.color = 'var(--cyan)';
+    status.classList.add('visible');
+
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(function() {
+      zone.classList.remove('tapped');
+      // Only clear status text if no file was selected
+      if (!htmlFile) {
+        status.textContent = '';
+        status.classList.remove('visible');
+      }
+    }, 2000);
+  }
+
+  // Listen for click on the zone itself (file input click bubbles up)
+  zone.addEventListener('click', showTapFeedback);
+  zone.addEventListener('touchstart', function() {
+    showTapFeedback();
+  }, { passive: true });
+
+  // Drag-and-drop handling
+  zone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    zone.classList.add('dragover');
+  });
+  zone.addEventListener('dragleave', function() {
+    zone.classList.remove('dragover');
+  });
+  zone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    if (e.dataTransfer.files.length > 0) {
+      fileInput.files = e.dataTransfer.files;
+      onFileSelect(fileInput);
+    }
+  });
+})();
+
+function checkReady() {
+  var token = document.getElementById('tokenInput').value.trim();
+  var repo  = document.getElementById('repoInput').value.trim();
+  document.getElementById('deployBtn').disabled = !(token && repo && htmlFile && !deploying);
+}
+
+function log(msg, type) {
+  var el = document.getElementById('log');
+  el.classList.add('visible');
+  var line = document.createElement('div');
+  line.className = 'log-line log-' + (type||'info');
+  line.textContent = msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+function setStatus(text, type) {
+  var b = document.getElementById('statusBadge');
+  b.className = 'status-badge visible ' + type;
+  b.innerHTML = text;
+}
+
+function setProgress(pct) {
+  document.getElementById('progressBar').classList.add('visible');
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+async function getFileSHA(token, repo, branch, path) {
+  var r = await fetch('https://api.github.com/repos/' + repo + '/contents/' + path + '?ref=' + branch, {
+    headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (r.status === 404) return null;
+  if (!r.ok) return undefined;
+  var j = await r.json();
+  return j.sha || null;
+}
+
+async function computeGitBlobSHA(arrayBuffer) {
+  var bytes = new Uint8Array(arrayBuffer);
+  var header = 'blob ' + bytes.length + '\0';
+  var headerBytes = new TextEncoder().encode(header);
+  var combined = new Uint8Array(headerBytes.length + bytes.length);
+  combined.set(headerBytes, 0);
+  combined.set(bytes, headerBytes.length);
+  var hashBuffer = await crypto.subtle.digest('SHA-1', combined);
+  var hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(function(b) { return b.toString(16).padStart(2,'0'); }).join('');
+}
+
+async function pushFile(token, repo, branch, path, content, sha, commitMsg) {
+  var body = { message: commitMsg, content: content, branch: branch };
+  if (sha) body.sha = sha;
+  var r = await fetch('https://api.github.com/repos/' + repo + '/contents/' + path, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'token ' + token,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github.v3+json'
+    },
+    body: JSON.stringify(body)
+  });
+  return r.ok;
+}
+
+function arrayBufferToBase64(buffer) {
+  var bytes = new Uint8Array(buffer);
+  var b = '';
+  for (var i = 0; i < bytes.byteLength; i++) b += String.fromCharCode(bytes[i]);
+  return btoa(b);
+}
+
+async function deploy() {
+  if (deploying) return;
+  deploying = true;
+  checkReady();
+
+  var token  = document.getElementById('tokenInput').value.trim();
+  var repo   = document.getElementById('repoInput').value.trim();
+  var branch = document.getElementById('branchInput').value.trim() || 'main';
+
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('statsRow').classList.remove('visible');
+  document.getElementById('pagesCard').style.display = 'none';
+
+  // Extract version from filename for commit message
+  var version = '';
+  if (htmlFile && htmlFile.name) {
+    var m = htmlFile.name.match(/[\d]+[._][\d]+/);
+    if (m) version = 'v' + m[0].replace(/_/g, '.');
+  }
+
+  setStatus('<span class="dot-pulse">\u25cf</span> Reading file...', 'working');
+  setProgress(5);
+
+  var pushed = 0, skipped = 0;
+
+  try {
+    var buf = await htmlFile.arrayBuffer();
+    var b64 = arrayBufferToBase64(buf);
+    var repoPath = 'Breach.html';
+
+    log('\ud83d\udcc4 File: ' + htmlFile.name + ' (' + Math.round(buf.byteLength/1024) + ' KB)', 'info');
+    log('\ud83c\udf3f Deploying as ' + repoPath + ' to ' + repo + ' @ ' + branch, 'info');
+    if (version) log('\ud83c\udff7 Version: ' + version, 'info');
+
+    setStatus('<span class="dot-pulse">\u25cf</span> Checking remote...', 'working');
+    setProgress(20);
+
+    // Get current SHA
+    var remoteSHA = await getFileSHA(token, repo, branch, repoPath);
+
+    // Compare hashes to skip if unchanged
+    if (remoteSHA) {
+      var localSHA = await computeGitBlobSHA(buf);
+      if (localSHA === remoteSHA) {
+        skipped = 1;
+        log('  = ' + repoPath + ' (unchanged — identical to remote)', 'dim');
+        setProgress(100);
+        setStatus('\u2705 Already up to date!', 'success');
+        document.getElementById('statPushed').textContent = '0';
+        document.getElementById('statSkipped').textContent = '1';
+        document.getElementById('statsRow').classList.add('visible');
+        deploying = false;
+        checkReady();
+        return;
+      }
+    }
+
+    setStatus('<span class="dot-pulse">\u25cf</span> Pushing...', 'working');
+    setProgress(50);
+
+    var commitMsg = 'Deploy Breach ' + (version || '') + ' via Deploy Tool';
+    var ok = await pushFile(token, repo, branch, repoPath, b64, remoteSHA, commitMsg.trim());
+
+    if (ok) {
+      pushed = 1;
+      log('  \u2713 ' + repoPath + ' pushed successfully', 'ok');
+      setProgress(100);
+      setStatus('\u2705 Deployed! Waiting for Pages...', 'success');
+      document.getElementById('statPushed').textContent = '1';
+      document.getElementById('statSkipped').textContent = '0';
+      document.getElementById('statsRow').classList.add('visible');
+      log('', 'dim');
+      log('\ud83d\ude80 Push complete! Polling GitHub Pages...', 'ok');
+      pollPagesDeployment(token, repo, version);
+    } else {
+      setStatus('\u274c Push failed — check token permissions', 'error');
+      log('  \u2717 ' + repoPath + ' — push failed', 'err');
+    }
+
+  } catch(e) {
+    setStatus('\u274c Error: ' + e.message, 'error');
+    log('Fatal: ' + e.message, 'err');
+  }
+
+  deploying = false;
+  checkReady();
+}
+
+async function pollPagesDeployment(token, repo, version) {
+  var card    = document.getElementById('pagesCard');
+  var badge   = document.getElementById('pagesBadge');
+  var bar     = document.getElementById('pagesProgress');
+  var elapsed = document.getElementById('pagesElapsed');
+  var link    = document.getElementById('siteLink');
+  var siteUrl = 'https://' + repo.split('/')[0].toLowerCase() + '.github.io/' + repo.split('/')[1];
+
+  card.style.display = 'block';
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  link.href = siteUrl;
+
+  var pollStart = Date.now();
+  var maxWait   = 60000;
+  var pollInterval = 5000;
+  var finished  = false;
+
+  function tick() {
+    var ms = Date.now() - pollStart;
+    var sec = Math.floor(ms / 1000);
+    elapsed.textContent = sec + 's';
+    bar.style.width = Math.min(90, (ms / 55000) * 90) + '%';
+  }
+
+  var tickInterval = setInterval(tick, 500);
+  var fallbackTimer = setTimeout(function() {
+    if (!finished) done(true, true);
+  }, maxWait);
+
+  async function checkStatus() {
+    if (finished) return;
+    try {
+      var url1 = 'https://api.github.com/repos/' + repo + '/actions/runs?per_page=1';
+      var r1 = await fetch(url1, {
+        headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (r1.ok) {
+        var runs = await r1.json();
+        if (runs.workflow_runs && runs.workflow_runs.length > 0) {
+          var run = runs.workflow_runs[0];
+          if (run.status === 'completed' && run.conclusion === 'success') { done(true, false); return; }
+          if (run.status === 'completed' && run.conclusion === 'failure') { done(false, false); return; }
+          badge.innerHTML = '<span class="dot-pulse">\u25cf</span> ' + run.status;
+        }
+      }
+    } catch(e) {
+      badge.innerHTML = '<span class="dot-pulse">\u25cf</span> Checking...';
+    }
+    if (!finished && Date.now() - pollStart < maxWait) setTimeout(checkStatus, pollInterval);
+  }
+
+  function done(success, timedOut) {
+    if (finished) return;
+    finished = true;
+    clearInterval(tickInterval);
+    clearTimeout(fallbackTimer);
+    bar.style.transition = 'width 0.5s ease';
+    bar.style.width = '100%';
+    var sec = Math.floor((Date.now() - pollStart) / 1000);
+    elapsed.textContent = sec + 's';
+
+    if (success) {
+      badge.className = 'status-badge visible success';
+      badge.innerHTML = timedOut ? '\u2705 Live! (~' + sec + 's)' : '\u2705 Live in ' + sec + 's!';
+      link.style.display = 'inline-block';
+      link.innerHTML = '\ud83d\ude80 PLAY BREACH' + (version ? ' ' + version : '');
+      log('\ud83c\udf10 Live at: ' + siteUrl, 'ok');
+    } else {
+      badge.className = 'status-badge visible error';
+      badge.innerHTML = '\u274c Deploy failed \u2014 check GitHub Actions';
+    }
+  }
+
+  log('\ud83d\udd0d Polling Pages status...', 'info');
+  setTimeout(checkStatus, 3000);
+}
+</script>
+</body>
+</html>
