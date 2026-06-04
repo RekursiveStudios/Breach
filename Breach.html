@@ -521,6 +521,9 @@
     will-change: transform;
     /* No transition during gesture — feels laggy. Transition only on
        double-tap reset which we apply ad-hoc. */
+    /* 2.29: relative positioning anchors the pivot-marker overlay
+       (used in the editor) to the board's content box. */
+    position: relative;
   }
   .board.zoom-reset {
     transition: transform 0.25s ease-out;
@@ -817,6 +820,55 @@
     gap: 4px;
     margin-bottom: 5px;
   }
+  /* 2.22: Phase 2A multi-select rows. Visually similar to the palette
+     but shorter and with smaller text so two rows fit without crowding.
+     Slightly different background so they read as a separate region. */
+  .builder-select-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 5px;
+  }
+  .builder-mini-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 5px 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)),
+                repeating-linear-gradient(45deg, #1f1a14 0 3px, #1d1812 3px 6px);
+    border: 1px solid #4a4030;
+    border-radius: 2px;
+    color: #c89d3f;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.12s, border-color 0.12s;
+  }
+  .builder-mini-btn:active { transform: scale(0.95); }
+  .builder-mini-btn:disabled { cursor: not-allowed; }
+  /* 2.27: SELECT mini-btn shows armed state with the same gold halo as
+     the palette buttons. The other mini-btns (ALL/YOURS/FOE/NONE) are
+     immediate actions and never get an armed state. */
+  .builder-mini-btn.armed {
+    background: linear-gradient(180deg, #4a3a1c 0%, #3a2c14 100%),
+                repeating-linear-gradient(45deg, #1f1a14 0 3px, #1d1812 3px 6px);
+    border-color: #d4a544;
+    color: #fff2b0;
+    box-shadow: 0 0 8px rgba(212, 165, 68, 0.55), inset 0 0 6px rgba(255, 200, 80, 0.25);
+  }
+  /* Danger variant — DELETE gets a red tint so it stands out. */
+  .builder-mini-btn.danger {
+    color: #d68574;
+    border-color: #5a3030;
+  }
+  /* Armed paste button — green tint to indicate "tap a cell next". */
+  .builder-mini-btn.paste-armed {
+    color: #b8e090;
+    border-color: #4a5a34;
+    box-shadow: 0 0 6px rgba(127,240,127,0.35) inset;
+  }
   .builder-palette-btn {
     flex: 1 1 0;
     min-width: 0;
@@ -834,6 +886,16 @@
     transition: all 0.12s;
   }
   .builder-palette-btn:active { transform: scale(0.94); }
+  /* 2.31: V2-variant palette buttons — slightly different accent so they
+     visually separate from V1 buttons in the same row. */
+  .builder-palette-btn.v2 {
+    border-color: rgba(220, 180, 80, 0.4);
+  }
+  .builder-palette-btn.v2.armed {
+    border-color: rgba(255, 213, 100, 0.95);
+    box-shadow: 0 0 0 2px rgba(255, 213, 100, 0.55), 0 0 10px rgba(255, 213, 100, 0.35);
+  }
+
   .builder-palette-btn.armed {
     background: linear-gradient(180deg, #4a3a1c 0%, #3a2c14 100%);
     border-color: #d4a544;
@@ -969,6 +1031,50 @@
     font-weight: 700;
     color: #fff2b0;
   }
+  /* 2.27: collapsible bottom-actions toggle bar. Thin and unobtrusive
+     when expanded; the only thing visible when collapsed. The chevron
+     rotates to indicate state. */
+  .builder-actions-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 6px;
+    padding: 5px 8px;
+    background: linear-gradient(180deg, #181410 0%, #131008 100%);
+    border: 1px solid #2e2820;
+    border-radius: 3px;
+    color: var(--ink-dim);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .builder-actions-toggle:active { transform: scale(0.99); }
+  .builder-actions-toggle:hover {
+    background: linear-gradient(180deg, #1d1812 0%, #18130c 100%);
+    border-color: #3a3228;
+  }
+  .builder-actions-toggle .bat-chev {
+    display: inline-block;
+    font-size: 11px;
+    line-height: 1;
+    transition: transform 0.18s;
+    color: #c9a356;
+  }
+  /* Collapsed state: rotate chevron + dim "actions" label less so it
+     reads as the only call-to-action on screen. */
+  .builder-actions-toggle[aria-expanded="false"] .bat-chev {
+    transform: rotate(-90deg);
+  }
+  .builder-actions-toggle[aria-expanded="false"] {
+    color: #c9a356;
+    border-color: #4a3a1c;
+  }
+  #builder-actions-wrap.collapsed { display: none; }
   .builder-action-row {
     display: flex;
     gap: 6px;
@@ -1013,6 +1119,127 @@
   body.builder-mode.builder-side-enemy .sq.builder-zone-enemy {
     box-shadow: inset 0 0 0 2px rgba(248,113,113,0.55);
   }
+  /* 2.19: SELECT tool highlight. A gold inset outline + slight glow so
+     the selected piece reads as picked regardless of which zone tint
+     is also present. Uses a stronger box-shadow stack so it overrides
+     the zone-tint box-shadow. The drag-lift class lowers the source
+     square's opacity while the user is dragging a piece. */
+  body.builder-mode .sq.builder-selected {
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 215, 80, 0.95),
+      0 0 12px rgba(255, 215, 80, 0.45) !important;
+  }
+  /* 2.25: hide the piece(s) inside a drag-source square completely so
+     the user only sees the ghost following their finger. Previously we
+     dimmed the whole square to 35% opacity, but that left a faint
+     "phantom" copy at the source location AND a ghost near the finger,
+     reading as "two overlapping pieces" — especially confusing for
+     small finger movements where the ghost stays near the source.
+     Hiding the piece while keeping the square itself fully visible
+     reads as a clean lift. */
+  body.builder-mode .sq.builder-drag-source > .piece,
+  body.builder-mode .sq.builder-drag-source > .builder-dup-ghost {
+    opacity: 0;
+    transition: opacity 0.08s;
+  }
+  /* The drag ghost — a piece-sized element absolutely positioned and
+     translated to follow the finger. Painted at lower opacity so the
+     board's drop targets show through. */
+  .builder-drag-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 220;
+    opacity: 0.75;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+    will-change: transform;
+    transform: translate(-50%, -50%);
+  }
+  /* Drop-target hover: cell highlighted under the dragged piece. */
+  body.builder-mode .sq.builder-drag-target {
+    box-shadow:
+      inset 0 0 0 2px rgba(127, 240, 127, 0.95),
+      0 0 14px rgba(127, 240, 127, 0.55) !important;
+  }
+  body.builder-mode .sq.builder-drag-target-invalid {
+    box-shadow:
+      inset 0 0 0 2px rgba(248, 113, 113, 0.95),
+      0 0 14px rgba(248, 113, 113, 0.45) !important;
+  }
+  /* 2.23: floating duplicate ghost. Sits on top of whatever's in the
+     cell below (often the original piece since DUPLICATE creates the
+     copy in-place). Translucent gold pulsing halo signals "this is the
+     duplicate — drag it where you want." Lower opacity than a regular
+     piece so the underlying cell stays visible.
+     IMPORTANT: position:absolute so we OVERLAY on the cell instead of
+     fighting the real piece for flex space. Without this, the real
+     piece gets squeezed out of view by the flex layout. */
+  .piece.builder-dup-ghost {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    opacity: 0.78;
+    z-index: 3;
+    filter: drop-shadow(0 0 6px rgba(255, 215, 80, 0.85))
+            drop-shadow(0 0 12px rgba(255, 215, 80, 0.45));
+    animation: builder-dup-pulse 1.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes builder-dup-pulse {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 215, 80, 0.85))
+                       drop-shadow(0 0 12px rgba(255, 215, 80, 0.45)); }
+    50%      { filter: drop-shadow(0 0 10px rgba(255, 215, 80, 1.0))
+                       drop-shadow(0 0 18px rgba(255, 215, 80, 0.7)); }
+  }
+  /* 2.29: rotation pivot marker. Sits absolutely positioned at the
+     intersection of grid lines (the corner where 4 cells meet). Gold
+     pulsing dot — same gold-themed visual language as selection halos
+     and dup ghosts. Marker is decorative only (no pointer events) —
+     it's redrawn whenever the board re-renders so it's always in
+     sync with the current pivot. */
+  .builder-pivot-marker {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff2b0 0%, #d4a544 55%, rgba(212, 165, 68, 0.15) 90%, transparent 100%);
+    border: 1.5px solid #fff2b0;
+    box-shadow:
+      0 0 12px rgba(255, 215, 80, 0.9),
+      0 0 4px #fff2b0,
+      inset 0 0 4px rgba(255, 255, 255, 0.5);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 30;
+    animation: builder-pivot-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes builder-pivot-pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 1; }
+    50%      { transform: translate(-50%, -50%) scale(1.35); opacity: 0.8; }
+  }
+  /* Small crosshair through the dot, just barely visible — helps the
+     user see it's centered on the intersection rather than nearby. */
+  .builder-pivot-marker::before,
+  .builder-pivot-marker::after {
+    content: "";
+    position: absolute;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 2px rgba(255, 215, 80, 0.9);
+  }
+  .builder-pivot-marker::before {
+    top: 50%; left: -4px; right: -4px; height: 1.5px;
+    transform: translateY(-50%);
+  }
+  .builder-pivot-marker::after {
+    left: 50%; top: -4px; bottom: -4px; width: 1.5px;
+    transform: translateX(-50%);
+  }
+  body.builder-mode .sq.has-dup-ghost {
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 215, 80, 0.7),
+      0 0 8px rgba(255, 215, 80, 0.35) !important;
+  }
   /* Hide normal game UI elements while editing — the bottom-dock and
      midbar are replaced by the builder panel. The board itself stays
      visible (that's what's being edited). */
@@ -1044,6 +1271,16 @@
        pan-y restores native vertical scrolling without re-enabling the
        in-game pinch-zoom gestures (which the builder doesn't need). */
     touch-action: pan-y;
+  }
+  /* 2.20: squares that hold a piece in builder mode disable touch-action
+     so vertical drags don't trigger page scroll. Without this, dragging
+     a piece downward (or upward) was scrolling the page instead of
+     initiating the drag-to-move gesture — the browser claimed the
+     gesture before our pointerdown→pointermove threshold fired. Empty
+     cells still inherit pan-y so the user can scroll past the board by
+     swiping on empty squares. */
+  body.builder-mode .sq:has(.piece) {
+    touch-action: none;
   }
   /* 2.06/2.07: in builder mode, make the body scrollable vertically and
      reserve room at the bottom for the fixed builder-panel so the last
@@ -1293,6 +1530,51 @@
     stroke: #3d130f;
     stroke-width: 0.6;
     filter: drop-shadow(0 0 1.5px rgba(61, 19, 15, 0.7));
+  }
+
+  
+  /* === Berserker V2 (2.31) ====================================== */
+  /* The body, pikes, side spikes and shoulder spikes all use the
+     existing .body-fill and .spike-fill classes so team coloring
+     cascades naturally. Below: V2-specific extras. */
+  .body-svg .bersv2-window {
+    fill: #0a0a0a;
+    stroke: rgba(0,0,0,0.6);
+    stroke-width: 0.6;
+  }
+  .piece.player .body-svg .bersv2-cannonball {
+    fill: #1a1a1a;
+    stroke: #444;
+    stroke-width: 0.4;
+  }
+  .piece.enemy .body-svg .bersv2-cannonball {
+    fill: #1a1a1a;
+    stroke: #555;
+    stroke-width: 0.4;
+  }
+  .body-svg .bersv2-port {
+    fill: #050505;
+    stroke: rgba(0,0,0,0.7);
+    stroke-width: 0.5;
+  }
+  /* HP pips along upper outline. Filled = green (per user spec); empty
+     = dim grey. Bonus pip styling reserved for the armor +1 pass. */
+  .body-svg .bersv2-hp-pip {
+    stroke: #1a2a1a;
+    stroke-width: 0.45;
+    transition: fill 0.18s ease;
+  }
+  .body-svg .bersv2-hp-pip.filled {
+    fill: #46c64a;
+  }
+  .body-svg .bersv2-hp-pip.empty {
+    fill: #2a2a2a;
+    opacity: 0.55;
+  }
+  /* Slightly heavier outline on the V2 body to keep silhouette crisp at
+     small sizes — gameplay reads distance, not detail. */
+  .body-svg .bersv2-body {
+    stroke-width: var(--body-stroke-w, 2.4);
   }
 
   /* Attacked-this-turn: dull the spikes (and trophy-spikes) to signal that
@@ -2107,7 +2389,7 @@
       <span class="menu-btn-sub">The original, kept for posterity</span>
     </button>
   </div>
-  <div class="menu-version">VERSION 2.14</div>
+  <div class="menu-version">VERSION 2.33</div>
 </div>
 
 <button class="music-btn" id="btn-music" title="Music on (tap to mute)" style="display: none;">♫</button>
@@ -2193,8 +2475,12 @@
   <div class="modal-card" style="max-width:340px;">
     <div class="modal-title">CUSTOM MAP</div>
     <div style="padding:0 2px 10px; font-size:11px; color:var(--ink-dim); font-family:'JetBrains Mono',monospace; letter-spacing:0.04em; line-height:1.4;">
-      Start with an empty board, or load the default army to edit?
+      Start with an empty board, the default army, or open a saved map.
     </div>
+    <!-- 2.17: recent saves shortcut. builderRenderStartRecent() fills
+         this with up to 3 of the most-recent local saves; "MORE..."
+         opens the full LOAD modal. Hidden if there are no saves. -->
+    <div id="builder-start-recent" style="display:none; flex-direction:column; gap:5px; margin-bottom:10px;"></div>
     <div style="display:flex; flex-direction:column; gap:8px;">
       <button id="builder-start-empty" style="padding:11px; font-family:'Cinzel',serif; font-size:12px; font-weight:700; letter-spacing:0.16em; background:linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), repeating-linear-gradient(45deg, #2e2820 0 3px, #2a241c 3px 6px); color:var(--ink); border:1px solid #4a4030; border-radius:2px; cursor:pointer;">EMPTY BOARD</button>
       <button id="builder-start-default" style="padding:11px; font-family:'Cinzel',serif; font-size:12px; font-weight:700; letter-spacing:0.16em; background:linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 45%, rgba(0,0,0,0.2) 100%), linear-gradient(180deg, #e0b54e 0%, #b8893a 100%); color:#1a1208; border:1px solid #8a6520; border-radius:2px; cursor:pointer; text-shadow:0 1px 0 rgba(255,230,180,0.4);">DEFAULT ARMY</button>
@@ -2250,8 +2536,34 @@
          The hint text moved into a sub-row below so these can sit right
          next to the title. -->
     <span class="builder-header-actions">
-      <button id="builder-undo-btn" class="builder-header-iconbtn" title="Undo (Ctrl-Z)">↶</button>
-      <button id="builder-redo-btn" class="builder-header-iconbtn" title="Redo (Ctrl-Y)">↷</button>
+      <!-- 2.21: undo/redo icons replaced with bespoke SVGs that read as
+           directional (straight + end-hook) rather than circular. The
+           previous ↶ / ↷ glyphs looked like rotation arrows, which got
+           confused with the mirror rotate toggle. Undo: leftward arrow
+           with a small downward curl at the tail. Redo: rightward arrow
+           with an upward curl. Both stroke currentColor so they pick up
+           the button's gold text and dim with disabled state. -->
+      <button id="builder-undo-btn" class="builder-header-iconbtn" title="Undo (Ctrl-Z)" aria-label="Undo">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round" style="display:block;">
+          <!-- Main shaft going right-to-left along the upper portion, then
+               curving down at the LEFT end (the "tail"). Arrowhead sits
+               at the left tip where the user reads "back". -->
+          <path d="M14 6 H6 Q3 6 3 9 V11"/>
+          <polyline points="5.2,9 3,11 0.8,9"/>
+        </svg>
+      </button>
+      <button id="builder-redo-btn" class="builder-header-iconbtn" title="Redo (Ctrl-Y)" aria-label="Redo">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round" style="display:block;">
+          <!-- Mirror of undo: shaft goes left-to-right along the lower
+               portion then curves UP at the right end. -->
+          <path d="M2 10 H10 Q13 10 13 7 V5"/>
+          <polyline points="10.8,7 13,5 15.2,7"/>
+        </svg>
+      </button>
     </span>
   </div>
   <div class="builder-subheader">
@@ -2269,6 +2581,37 @@
     <!-- Buttons injected by JS so we don't duplicate unit names here -->
   </div>
 
+  <!-- 2.22: Phase 2A multi-select action row. SELECT ALL / YOURS / FOE
+       set the selection in bulk; COPY snapshots it; PASTE arms a
+       drop-on-next-tap mode; DELETE wipes the selected pieces. Buttons
+       dim when not applicable (no selection -> no COPY/DELETE; empty
+       clipboard -> no PASTE). -->
+  <div class="builder-select-row">
+    <!-- 2.27: SELECT tool moved here from the palette. Toggles the
+         armed state for tap-to-select; default armed state on entering
+         the editor. Visually grouped with the bulk-select actions
+         since they're all "select-related". -->
+    <button class="builder-mini-btn" id="builder-sel-tool"  title="Select tool — tap pieces to add to selection">SELECT</button>
+    <button class="builder-mini-btn" id="builder-sel-all"   title="Select all pieces">ALL</button>
+    <button class="builder-mini-btn" id="builder-sel-yours" title="Select your pieces">YOURS</button>
+    <button class="builder-mini-btn" id="builder-sel-foe"   title="Select foe pieces">FOE</button>
+    <button class="builder-mini-btn" id="builder-sel-none"  title="Clear selection">NONE</button>
+  </div>
+  <div class="builder-select-row">
+    <button class="builder-mini-btn" id="builder-dup-btn"   title="Duplicate selection — drag to move the copy">DUPLICATE</button>
+    <button class="builder-mini-btn danger" id="builder-del-btn" title="Delete selection">DELETE</button>
+  </div>
+  <!-- 2.26/2.29: group rotate. ROT ↺/↻ rotates the selection 90° in
+       place around its bounding-box center by default — OR around a
+       custom pivot point if one is set. PIVOT button arms a picker
+       mode: tap an intersection on the board to drop the pivot there.
+       Tap the pivot again (in picker mode) to clear it. -->
+  <div class="builder-select-row">
+    <button class="builder-mini-btn" id="builder-pivot-btn" title="Set rotation pivot — tap an intersection on the board">PIVOT</button>
+    <button class="builder-mini-btn" id="builder-rot-ccw"   title="Rotate selection 90° counter-clockwise (around pivot if set)">ROT ↺</button>
+    <button class="builder-mini-btn" id="builder-rot-cw"    title="Rotate selection 90° clockwise (around pivot if set)">ROT ↻</button>
+  </div>
+
   <!-- Toggle: allow placement anywhere vs. each side's back half only -->
   <label class="builder-checkbox-row">
     <input type="checkbox" id="builder-allow-anywhere">
@@ -2282,6 +2625,11 @@
        (back row mirrors to back row), while ROTATE flips through the
        board's center (lower-right ↔ upper-left). MIRROR NOW applies the
        current mode once. -->
+  <!-- 2.10: live-mirror row. The mirror MODE is a single toggle button
+       cycling between vertical flip (↕ top↔bottom) and 180° rotation
+       through board center (⤾). MIRROR NOW applies the current mode
+       once. 2.29: reverted from the multi-axis picker — the diagonals
+       only worked on square boards and weren't pulling their weight. -->
   <label class="builder-checkbox-row">
     <input type="checkbox" id="builder-mirror-live">
     <span>mirror placements live</span>
@@ -2308,19 +2656,87 @@
     </button>
   </div>
 
-  <!-- 2.10: sliders restyled to match the in-game (dev panel) slider
-       look. Each placeholder is filled at builder-init time by
-       builderBuildSlider() which renders a canvas track + handle with
-       the same drawing helpers the dev panel uses. -->
-  <div class="builder-slider-mount" id="builder-rows-mount"></div>
-  <div class="builder-slider-mount" id="builder-cols-mount"></div>
-  <div class="builder-slider-mount" id="builder-player-hp-mount"></div>
-  <div class="builder-slider-mount" id="builder-enemy-hp-mount"></div>
+  <!-- 2.27: ROWS/COLS/HP sliders moved into the dev panel BOARD section
+       (open DEV in the editor to access them). They were taking a lot
+       of vertical space here and were duplicates of the dev-panel
+       sliders anyway. -->
 
-  <!-- Action row: BACK to menu (discards edits), PLAY to start a game -->
-  <div class="builder-action-row">
-    <button id="builder-back-btn" class="builder-action-btn">BACK</button>
-    <button id="builder-play-btn" class="builder-action-btn primary">PLAY</button>
+  <!-- 2.27: bottom rows (LOAD/DEV/SAVE + BACK/PLAY) wrapped in a
+       collapsible container. The toggle bar is always visible and
+       sits just above the actions; tapping it toggles the rows.
+       Default state is expanded; collapsed state persists across
+       editor sessions via localStorage so the user's preference
+       sticks. The chevron's direction reflects state. -->
+  <button id="builder-actions-toggle" class="builder-actions-toggle"
+          title="Hide / show bottom actions" aria-expanded="true">
+    <span class="bat-chev">▾</span>
+    <span class="bat-label">actions</span>
+  </button>
+  <div id="builder-actions-wrap">
+    <!-- 2.17/2.18: LOAD / DEV / SAVE row. LOAD opens a modal that lists
+         locally-saved maps + a "from file..." option. DEV opens the dev
+         panel for live unit tuning while editing (the panel's normal
+         gameplay-corner button is hidden in builder-mode). SAVE opens a
+         name-prompt modal that stores to localStorage AND offers a file
+         download. All three modals are game-styled. -->
+    <div class="builder-action-row">
+      <button id="builder-load-btn" class="builder-action-btn">LOAD</button>
+      <button id="builder-dev-btn"  class="builder-action-btn">DEV</button>
+      <button id="builder-save-btn" class="builder-action-btn">SAVE</button>
+    </div>
+
+    <!-- Action row: BACK to menu (discards edits), PLAY to start a game -->
+    <div class="builder-action-row">
+      <button id="builder-back-btn" class="builder-action-btn">BACK</button>
+      <button id="builder-play-btn" class="builder-action-btn primary">PLAY</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2.17: SAVE prompt — themed name input modal. Pinned above editor. -->
+<div class="modal" id="builder-save-modal" style="z-index: 250;">
+  <div class="modal-card" style="max-width:340px;">
+    <div class="modal-title">SAVE MAP</div>
+    <div style="padding:0 2px 10px; font-size:11px; color:var(--ink-dim); font-family:'JetBrains Mono',monospace; letter-spacing:0.04em; line-height:1.4;">
+      Name this map. It'll be saved on this device and offered as a <b style="color:var(--gold);">.breachmap</b> file you can keep or share. Same-named maps overwrite.
+    </div>
+    <input id="builder-save-name" type="text" placeholder="my map" maxlength="48"
+      style="width:100%; box-sizing:border-box; padding:9px 11px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--ink); background:#15110c; border:1px solid #4a4030; border-radius:3px; letter-spacing:0.04em;">
+    <label style="display:flex; align-items:center; gap:6px; padding:8px 2px 0; font-size:10px; color:var(--ink-dim); letter-spacing:0.04em; cursor:pointer;">
+      <input type="checkbox" id="builder-save-download" checked style="accent-color: var(--gold);">
+      <span>also download as file</span>
+    </label>
+    <!-- 2.18: include-dev-settings checkbox. Defaults ON so users who
+         have tuned unit stats in the dev panel preserve them in the
+         save. Unchecking strips the devPreset from the saved map blob,
+         which means loading the map later will use whatever dev panel
+         tuning the player has at THAT moment (no override). -->
+    <label style="display:flex; align-items:center; gap:6px; padding:4px 2px 0; font-size:10px; color:var(--ink-dim); letter-spacing:0.04em; cursor:pointer;">
+      <input type="checkbox" id="builder-save-include-dev" checked style="accent-color: var(--gold);">
+      <span>include dev panel settings</span>
+    </label>
+    <div style="display:flex; gap:8px; margin-top:14px;">
+      <button id="builder-save-cancel" style="flex:1; padding:9px; font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:0.16em; background:linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), repeating-linear-gradient(45deg, #2e2820 0 3px, #2a241c 3px 6px); color:var(--ink); border:1px solid #4a4030; border-radius:2px; cursor:pointer;">CANCEL</button>
+      <button id="builder-save-confirm" style="flex:1.4; padding:9px; font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:0.16em; background:linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 45%, rgba(0,0,0,0.2) 100%), linear-gradient(180deg, #e0b54e 0%, #b8893a 100%); color:#1a1208; border:1px solid #8a6520; border-radius:2px; cursor:pointer; text-shadow:0 1px 0 rgba(255,230,180,0.4);">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2.17: LOAD picker — list of locally-saved maps with a from-file
+     fallback. Each row shows the map name, its row×col size and piece
+     count, and saved-at date. Long-press a row to delete (with confirm
+     flash). Filled in dynamically by builderRenderSavedMapList(). -->
+<div class="modal" id="builder-load-modal" style="z-index: 250;">
+  <div class="modal-card" style="max-width:380px; max-height:80vh; display:flex; flex-direction:column;">
+    <div class="modal-title">LOAD MAP</div>
+    <div id="builder-load-list" style="overflow-y:auto; max-height:55vh; padding:2px 0; margin: 4px 0 8px;">
+      <!-- rows injected by builderRenderSavedMapList() -->
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button id="builder-load-from-file" style="flex:1; padding:9px; font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:0.16em; background:linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), repeating-linear-gradient(45deg, #283224 0 3px, #243020 3px 6px); color:#c8e090; border:1px solid #4a5a34; border-radius:2px; cursor:pointer;">FROM FILE...</button>
+      <button id="builder-load-cancel" style="flex:1; padding:9px; font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:0.16em; background:linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), repeating-linear-gradient(45deg, #2e2820 0 3px, #2a241c 3px 6px); color:var(--ink); border:1px solid #4a4030; border-radius:2px; cursor:pointer;">CANCEL</button>
+    </div>
+    <input id="builder-load-file-input" type="file" accept=".breachmap,.json,application/json" style="display:none;">
   </div>
 </div>
 
@@ -2702,6 +3118,9 @@ function applyBoardDimensions(newRows, newCols) {
     initState();
     if (typeof render === 'function') render();
   }
+  // 2.27: diagonal mirror modes are square-only — re-sync the axis
+  // picker's dim/armed state after a resize.
+  if (typeof window._refreshMirrorModeLabel === 'function') window._refreshMirrorModeLabel();
 }
 // Apply the initial dimensions immediately so the CSS vars are set before
 // the board first renders.
@@ -2848,6 +3267,14 @@ const EXP_PIECE_DEFS = {
 };
 
 const EXP_KILL_GOLD = { berserker: 8, knight: 3, footman: 4, archer: 5 };
+
+// 2.31: V2 piece definitions — alternate variants with their own stats.
+// Flagged by p.variant === 'v2' on the spawned piece. Only fields present
+// here override the V1 def from EXP_PIECE_DEFS[type]; everything else
+// inherits as normal.
+const EXP_PIECE_DEFS_V2 = {
+  berserker: { hp: 6, movePoints: 3 }
+};
 
 // Per-team unit icon images (embedded PNGs).
 // Keyed by `${type}_${team}` where team is 'player' (blue) or 'enemy' (red).
@@ -4009,7 +4436,7 @@ function initState() {
       if (p.row < 0 || p.row >= ROWS || p.col < 0 || p.col >= COLS) continue;
       if (!pieceDefs()[p.type]) continue;
       if (state.board[p.row][p.col]) continue; // square already taken
-      const sp = spawnPiece(p.owner === ENEMY ? ENEMY : PLAYER, p.type, p.row, p.col);
+      const sp = spawnPiece(p.owner === ENEMY ? ENEMY : PLAYER, p.type, p.row, p.col, p.variant || undefined);
       if (typeof p.facing === 'number') sp.facing = ((p.facing % 8) + 8) % 8;
     }
     _pendingCustomLayout = null; // consume so the next game is default again
@@ -4025,7 +4452,7 @@ function initState() {
   logEntry('Battle begins. Breach the enemy castle.');
 }
 
-function spawnPiece(owner, type, row, col) {
+function spawnPiece(owner, type, row, col, variant) {
   const def = pieceDefs()[type];
   const piece = {
     id: state.nextId++,
@@ -4063,6 +4490,19 @@ function spawnPiece(owner, type, row, col) {
     piece.move = def.move; piece.moveType = def.moveType;
     piece.range = def.range;
     piece.baseCastleAtk = def.castleAtk; piece.castleAtk = def.castleAtk;
+  }
+  // 2.31: variant overlay. After base stats are set from EXP_PIECE_DEFS,
+  // overlay EXP_PIECE_DEFS_V2[type] fields if variant === 'v2'. Stamp
+  // p.variant so renderers can route appropriately.
+  if (variant === 'v2' && EXP_PIECE_DEFS_V2[type]) {
+    piece.variant = 'v2';
+    const v2 = EXP_PIECE_DEFS_V2[type];
+    if (typeof v2.hp === 'number') {
+      piece.baseHp = piece.maxHp = piece.hp = v2.hp;
+    }
+    if (typeof v2.movePoints === 'number') {
+      piece.movePoints = piece.maxMovePoints = v2.movePoints;
+    }
   }
   state.pieces.push(piece);
   state.board[row][col] = { kind: 'piece', id: piece.id };
@@ -4598,6 +5038,68 @@ function experimentalDoCastleAttack(piece) {
       applyHit();
     }, 120);
   }
+}
+
+// =========================================================================
+// 2.16: Multi-step move reachability (experimental mode only).
+// -------------------------------------------------------------------------
+// The single-step legalMovesFor returns only 1-step neighbours. To let the
+// player tap any square the piece could reach this activation in a single
+// gesture, we BFS outward from the piece up to `movePoints` deep, treating
+// only empty cells as walkable, and return a map of destination cell -> path.
+// The render layer draws these as additional green highlights; the click
+// handler executes the multi-step path by chaining single doMove() calls
+// with small delays between, decrementing movePoints once per step (which
+// matches what would happen if the player had clicked each step manually).
+//
+// Notes:
+//   - Berserkers can only move forward. We honour that constraint by
+//     restricting the BFS step directions to their facing.
+//   - Attacks are NOT covered by this — only empty-cell movement. The
+//     player still attacks adjacent enemies one click at a time.
+//   - The AI is unaffected: it still uses legalMovesFor directly for its
+//     single-step scoring. Multi-step is purely a player UX affordance.
+// =========================================================================
+function computeReachableCells(piece) {
+  if (gameMode !== 'experimental') return [];
+  if (!piece || piece.movePoints <= 0) return [];
+
+  // Step directions: 8-way for most units; just the facing direction for
+  // berserkers. Match the constraint inside experimentalLegalMovesFor.
+  const dirs = [];
+  if (piece.type === 'berserker') {
+    dirs.push(DIR_VECTORS[piece.facing]);
+  } else {
+    for (let i = 0; i < 8; i++) dirs.push(DIR_VECTORS[i]);
+  }
+
+  // Standard BFS up to movePoints deep. visited stores the path to each
+  // reachable cell so we can hand the click handler the exact route.
+  const visited = new Map(); // "r,c" -> { row, col, dist, path: [{row,col}, ...] }
+  const startKey = piece.row + ',' + piece.col;
+  visited.set(startKey, { row: piece.row, col: piece.col, dist: 0, path: [] });
+  const queue = [{ row: piece.row, col: piece.col, dist: 0 }];
+
+  while (queue.length) {
+    const cur = queue.shift();
+    if (cur.dist >= piece.movePoints) continue;
+    for (const [dr, dc] of dirs) {
+      const r = cur.row + dr, c = cur.col + dc;
+      if (!inBounds(r, c)) continue;
+      const key = r + ',' + c;
+      if (visited.has(key)) continue;
+      // Only empty cells are walkable. Pieces and barricades block.
+      if (occupant(r, c)) continue;
+      const curEntry = visited.get(cur.row + ',' + cur.col);
+      const newPath = curEntry.path.concat([{ row: r, col: c }]);
+      visited.set(key, { row: r, col: c, dist: cur.dist + 1, path: newPath });
+      queue.push({ row: r, col: c, dist: cur.dist + 1 });
+    }
+  }
+  // Strip the origin from the results.
+  visited.delete(startKey);
+  // Return as a plain array.
+  return Array.from(visited.values());
 }
 
 function legalMovesFor(piece) {
@@ -6308,15 +6810,32 @@ function render() {
       const occHere = occupant(r, c);
       if (occHere && occHere.kind === 'piece') {
         const ph = pieceAt(r, c);
-        if (ph && ph.owner === PLAYER) {
+        // 2.19: skip equip handlers while the editor is active — equip is
+        // a gameplay mechanic and the long-press would conflict with the
+        // editor's tap-and-drag-to-move behavior.
+        if (ph && ph.owner === PLAYER && !_builderActive) {
           attachEquipHandlersToSquare(sq, r, c);
         }
+      }
+      // 2.19: in editor mode, attach drag-to-move handlers to every
+      // square (regardless of piece owner — you control everything here).
+      if (_builderActive) {
+        attachBuilderDragHandlers(sq, r, c);
       }
 
       if (state.lastMove && state.lastMove.row === r && state.lastMove.col === c) {
         sq.classList.add('last-move');
       }
       let isTargetableHere = false;
+      // 2.19: when the editor's SELECT tool has pieces selected, show a
+      // gold halo on each selected piece's square. Distinct from the
+      // gameplay `.selected` class so the visuals don't collide.
+      if (_builderActive && _builderUI.selectedIds.size > 0) {
+        const occ = state.board[r][c];
+        if (occ && occ.kind === 'piece' && _builderUI.selectedIds.has(occ.id)) {
+          sq.classList.add('builder-selected');
+        }
+      }
       if (state.selectedId) {
         const sel = state.pieces.find(p => p.id === state.selectedId);
         if (sel && sel.row === r && sel.col === c) sq.classList.add('selected');
@@ -6339,8 +6858,48 @@ function render() {
       }
       else if (occ?.kind === 'barricade') sq.appendChild(renderBarricade(barricadeAt(r, c)));
 
+      // 2.23: floating duplicate ghosts. Pieces in _builderUI.floatingDup
+      // don't occupy state.board cells (they're a separate buffer), so we
+      // overlay them on top of whatever's actually rendered. The ghost
+      // gets a class so CSS can give it a distinct look (translucent,
+      // pulsing gold halo) and the drag-handler routing can detect it.
+      if (_builderActive && _builderUI.floatingDup && _builderUI.floatingDup.length > 0) {
+        const dup = _builderUI.floatingDup.find(d => d.row === r && d.col === c);
+        if (dup) {
+          // 2.25: pass the dup directly to renderPiece. The dup is a
+          // full deep-copy of the original piece (set in
+          // builderDuplicateSelection), so renderPiece has every field
+          // it needs (spikes, castleTurrets, bonusMaxHp, etc.).
+          // Previously we built a minimal synth object and the render
+          // threw on `p.spikes[dir]` — that left the dup half-rendered
+          // and the visual flashed for a moment then died.
+          const ghostEl = renderPiece(dup);
+          if (ghostEl) {
+            ghostEl.classList.add('builder-dup-ghost');
+            // Mark the parent square so drag handlers know.
+            sq.classList.add('has-dup-ghost');
+            sq.dataset.dupId = dup.id;
+            sq.appendChild(ghostEl);
+          }
+        }
+      }
+
       boardEl.appendChild(sq);
     }
+  }
+
+  // 2.29: pivot marker for the editor's group-rotate feature. Sits at
+  // the intersection of grid lines and pulses gold. Skipped outside
+  // the editor and when no pivot is set. The board element has
+  // position:relative (set elsewhere) so absolute positioning here
+  // works against it.
+  if (_builderActive && _builderUI.pivot) {
+    const { Ir, Ic } = _builderUI.pivot;
+    const marker = document.createElement('div');
+    marker.className = 'builder-pivot-marker';
+    marker.style.top  = (Ir / ROWS * 100) + '%';
+    marker.style.left = (Ic / COLS * 100) + '%';
+    boardEl.appendChild(marker);
   }
 
   // Castle strip rendering
@@ -6488,7 +7047,344 @@ function renderPiece(p) {
   return pe;
 }
 
+
+// ============================================================================
+// 2.31: Berserker V2 — bespoke renderer  (geometry revised in 2.32, 2.33)
+// ----------------------------------------------------------------------------
+// First of the V2 piece variants. Distinctive silhouette: bulky castle with
+// a flat top edge crowned by 4 chunky front pikes, 4 shoulder spikes
+// radiating perpendicular to the 45° chamfers, 4 horizontal side spikes,
+// 2 windows in the upper corners, a cannonball row in the lower section,
+// and 3 stamina bars hanging below the bottom edge.
+//
+// Front edge sits at y=-28 (pulled back from V1's -34) so spikes can extend
+// long without poking through the tile border — this also gives the fiction
+// for "doesn't occupy adjacent attack square: long spikes = greater reach."
+// Body bottom at y=34 matches V1 so the move-bar spacing carries over.
+//
+// HP visualization uses 6 perimeter pips symmetric across the central
+// vertical axis: 2 vertical pips on the upper side walls (aligned with the
+// inward step), 2 angled pips inside the NW/NE chamfers, and 2 horizontal
+// pips centered under the front edge. Pip index 0 fills first (left
+// vertical), 5 empties first (right vertical).
+//
+// Default stats (set in EXP_PIECE_DEFS_V2): 6 HP, 3 MP.
+// ============================================================================
+function renderBerserkerV2(p) {
+  const pe = document.createElement('div');
+  const isSelected = state.selectedId === p.id;
+  const isResumable = (state.resumablePieceIds && state.resumablePieceIds.has(p.id)) || state.resumablePieceId === p.id;
+  let cantActivate = false;
+  if (gameMode === 'experimental' && p.owner === PLAYER && state.turn === PLAYER && !state.over) {
+    if (state.actionsLeft <= 0) {
+      const isActivated = (state.activatedPieceId === p.id);
+      if (!isActivated && !isResumable && !p.acted) cantActivate = true;
+    }
+  }
+  pe.className = 'piece ' + p.owner +
+    (p.acted ? ' acted' : '') +
+    (p.hasAttacked ? ' has-attacked' : '') +
+    (isResumable ? ' resumable' : '') +
+    (isSelected ? ' selected-pulse' : '') +
+    (cantActivate ? ' cant-activate' : '') +
+    ' has-facing bersv2';
+  pe.dataset.pieceId = p.id;
+
+  // Castle damage gradient (same as V1)
+  const turretBase   = getComputedStyle(document.documentElement).getPropertyValue('--turret-color').trim()        || '#000000';
+  const turretBreach = getComputedStyle(document.documentElement).getPropertyValue('--turret-color-breach').trim() || turretBase;
+  const advancement = p.owner === 'player' ? (ROWS - 1 - p.row) / (ROWS - 1) : p.row / (ROWS - 1);
+  pe.style.setProperty('--turret-color-self', interpolateColor(turretBase, turretBreach, advancement));
+
+  const exp = document.createElement('div');
+  exp.className = 'piece-exp-v2 bersv2';
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '-50 -50 100 100');
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  svg.classList.add('body-svg', 'bersv2-silhouette');
+  svg.style.transform = `rotate(${p.facing * 45}deg)`;
+  svg.style.overflow = 'visible';
+
+  // -------- Body silhouette --------
+  // Geometry summary:
+  //   - Front (top) edge at y=-28 (pulled back from V1's -32 so spikes can
+  //     extend long without poking through the tile border).
+  //   - Crenellated top: 4 merlons (each 10 wide) + 3 crenel gaps (each 4
+  //     wide). Crenel floors at y=-24, merlon tops at y=-28.
+  //   - 45° shoulder chamfers from (±26,-28) to (±32,-22).
+  //   - Upper side walls vertical at x=±32 from y=-22 down to y=4.
+  //   - Small inward step at y=4: side walls jog inward from ±32 to ±30.
+  //   - Lower side walls vertical at x=±30 down to y=34 (matches V1 body R=34
+  //     so the move-bar spacing carries over identically).
+  //   - Flat bottom from -30 to 30 at y=34.
+  const bodyD = [
+    'M -26 -28',          // upper-left
+    'L 26 -28',           // flat top edge — no crenellations
+    'L 32 -22',           // right 45° shoulder
+    'L 32 18',            // down to the inward step (lower than 2.32)
+    'L 30 18',            // inward step
+    'L 30 34',            // down to bottom corner
+    'L -30 34',           // across bottom
+    'L -30 18',           // up to mirrored step
+    'L -32 18',           // outward step
+    'L -32 -22',          // up to left shoulder top
+    'Z'                   // diagonal back to start via the L shoulder
+  ].join(' ');
+  const bodyPath = document.createElementNS(ns, 'path');
+  bodyPath.setAttribute('d', bodyD);
+  bodyPath.setAttribute('class', 'body-fill bersv2-body');
+  svg.appendChild(bodyPath);
+
+  // -------- Spikes (12 total, all ~18 long, equal size) --------
+  // Drawn after the body so they overlap the silhouette correctly.
+
+  // 4 front pikes — one per merlon, base width 3 at y=-28, tip at y=-46.
+  // Centered on the merlon tops: M1=-21, M2=-7, M3=7, M4=21.
+  // Chunkier pikes per 2.33 — base half-width 2.5 instead of 1.5, so each
+  // pike base is 5 wide. Centers stay on the same x positions (the merlon
+  // positions from 2.32, now without the merlons).
+  const frontPikeCenters = [-21, -7, 7, 21];
+  for (const cx of frontPikeCenters) {
+    const pike = document.createElementNS(ns, 'path');
+    pike.setAttribute('d', `M ${cx - 2.5} -28 L ${cx + 2.5} -28 L ${cx} -46 Z`);
+    pike.setAttribute('class', 'spike-fill bersv2-pike');
+    svg.appendChild(pike);
+  }
+
+  // 4 shoulder spikes — 2 per shoulder chamfer, pointing perpendicular
+  // outward from the 45° edge. Each chamfer runs (±26,-28) <-> (±32,-22),
+  // length sqrt(72) ≈ 8.49. Place spike bases at t=0.3 and t=0.7 along the
+  // edge with base width 3 and length 18 outward.
+  // Left chamfer: edge dir (-0.707, 0.707), outward perp (-0.707, -0.707).
+  const SPK_LEN = 18;
+  const SPK_HW = 1.5;  // half-base width
+  function shoulderSpike(t, side) {
+    // side: 'L' or 'R'
+    const sx = side === 'L' ? -1 : 1;
+    // chamfer start (±26, -28), end (±32, -22)
+    const ex = (sx * 26) + (sx * 6) * t;
+    const ey = -28 + 6 * t;
+    // along-edge unit (toward the outer/lower end)
+    const ax = sx * 0.707, ay = 0.707;
+    // outward perpendicular (rotate along by -90° in screen coords)
+    // Cross-check: at midpoint, outward should point up-and-out (away from
+    // body center). For L, that's (-, -); for R, (+, -). Computed as
+    // (sx * 0.707, -0.707).
+    const ox = sx * 0.707, oy = -0.707;
+    const c1x = ex + SPK_HW * ax, c1y = ey + SPK_HW * ay;
+    const c2x = ex - SPK_HW * ax, c2y = ey - SPK_HW * ay;
+    const tx = ex + SPK_LEN * ox, ty = ey + SPK_LEN * oy;
+    // Wind triangle so outward-facing side is consistent for fill rules.
+    // For L: along-edge points (-,+) so c1=lower-outer, c2=upper-inner.
+    // For R: along-edge points (+,+) so c1=lower-outer, c2=upper-inner.
+    // Either way M c2 L c1 L tip Z works.
+    return `M ${c2x.toFixed(2)} ${c2y.toFixed(2)} L ${c1x.toFixed(2)} ${c1y.toFixed(2)} L ${tx.toFixed(2)} ${ty.toFixed(2)} Z`;
+  }
+  for (const t of [0.3, 0.7]) {
+    for (const side of ['L', 'R']) {
+      const sp = document.createElementNS(ns, 'path');
+      sp.setAttribute('d', shoulderSpike(t, side));
+      sp.setAttribute('class', 'spike-fill bersv2-shoulder-spike');
+      svg.appendChild(sp);
+    }
+  }
+
+  // 4 side spikes — 2 horizontal per side, on the upper section side walls.
+  // 2.33: upper section now runs y=-22..y=18 (step lowered). Vertical pip
+  // sits at y=12..18 just above the step. Two spikes positioned to evenly
+  // divide the remaining wall space (y=-22 to y=12, ~34 units) with the
+  // pip below: y=-14 (1/3 down) and y=2 (2/3 down) — leaves clean
+  // separation from the shoulder, between spikes, and from the pip.
+  // Base width 3, length 18 (tip at x=±50, right at the tile edge).
+  const sideSpikeYs = [-14, 2];
+  for (const sy of sideSpikeYs) {
+    // East
+    const rs = document.createElementNS(ns, 'path');
+    rs.setAttribute('d', `M 32 ${sy - 1.5} L 32 ${sy + 1.5} L 50 ${sy} Z`);
+    rs.setAttribute('class', 'spike-fill bersv2-side-spike');
+    svg.appendChild(rs);
+    // West
+    const ls = document.createElementNS(ns, 'path');
+    ls.setAttribute('d', `M -32 ${sy - 1.5} L -32 ${sy + 1.5} L -50 ${sy} Z`);
+    ls.setAttribute('class', 'spike-fill bersv2-side-spike');
+    svg.appendChild(ls);
+  }
+
+  // -------- Interior decoration --------
+  // Windows (2 dark rectangles tucked into the upper corners, inside the
+  // body but visually framed by the shoulder chamfers).
+  for (const wx of [-22, 16]) {
+    const w = document.createElementNS(ns, 'rect');
+    w.setAttribute('x', wx);
+    w.setAttribute('y', -18);
+    w.setAttribute('width', 6);
+    w.setAttribute('height', 8);
+    w.setAttribute('class', 'bersv2-window');
+    svg.appendChild(w);
+  }
+
+  // Cannonball row — 7 small circles in the lower-middle interior.
+  // Slightly lower than before to keep clear of the central icon.
+  for (const cbx of [-18, -12, -6, 0, 6, 12, 18]) {
+    const cb = document.createElementNS(ns, 'circle');
+    cb.setAttribute('cx', cbx);
+    cb.setAttribute('cy', 26);
+    cb.setAttribute('r', 2.2);
+    cb.setAttribute('class', 'bersv2-cannonball');
+    svg.appendChild(cb);
+  }
+
+  // -------- Health pips (6 total, symmetric) --------
+  // Listed left-to-right (CCW around the upper perimeter):
+  //   0: left vertical   (x=-32..-30, y=-2..4)  aligned w/ inward step
+  //   1: left shoulder   (rotated 135° inside the NW chamfer)
+  //   2: left front      (under the top edge, between M2 and center)
+  //   3: right front     (mirror of 2)
+  //   4: right shoulder  (mirror of 1)
+  //   5: right vertical  (mirror of 0)
+  //
+  // Fill order: pip i is filled iff i < hp+bonusHp. This means pips empty
+  // from the right (back of perimeter) inward as damage accrues. The 7th
+  // pip from armor bonus is deferred to a later pass — it would slot in as
+  // index 6, somewhere along the bottom edge.
+  const hpEffective = Math.max(0, p.hp + (p.bonusHp || 0));
+  const pipDefs = [
+    // Left vertical: small upright rect tucked against the upper wall, sitting
+    // directly above the inward step segment (which spans x=-32..-30 at y=18).
+    // Width matches the step segment so it "fits and aligns" as described.
+    { kind: 'rect', x: -32, y: 12, w: 2, h: 6 },
+    // Left shoulder: 10x2 horizontal rect rotated +135° to lay along the
+    // NW chamfer, offset slightly inward from the edge into the body.
+    { kind: 'rotated', cx: -27.5, cy: -23.5, w: 10, h: 2, rot: 135 },
+    // Left front: 6x2 horizontal rect just below the top edge, sitting
+    // centered between the center line and the M2 merlon.
+    { kind: 'rect', x: -10, y: -27.6, w: 6, h: 2 },
+    // Right front
+    { kind: 'rect', x: 4, y: -27.6, w: 6, h: 2 },
+    // Right shoulder
+    { kind: 'rotated', cx: 27.5, cy: -23.5, w: 10, h: 2, rot: 45 },
+    // Right vertical
+    { kind: 'rect', x: 30, y: 12, w: 2, h: 6 },
+  ];
+  for (let i = 0; i < pipDefs.length; i++) {
+    const d = pipDefs[i];
+    const filled = i < hpEffective;
+    const pip = document.createElementNS(ns, 'rect');
+    if (d.kind === 'rect') {
+      pip.setAttribute('x', d.x);
+      pip.setAttribute('y', d.y);
+      pip.setAttribute('width', d.w);
+      pip.setAttribute('height', d.h);
+    } else {
+      // Local rect centered on origin, then rotated and translated.
+      pip.setAttribute('x', -d.w / 2);
+      pip.setAttribute('y', -d.h / 2);
+      pip.setAttribute('width', d.w);
+      pip.setAttribute('height', d.h);
+      pip.setAttribute('transform', `translate(${d.cx} ${d.cy}) rotate(${d.rot})`);
+    }
+    pip.setAttribute('class', 'bersv2-hp-pip' + (filled ? ' filled' : ' empty'));
+    svg.appendChild(pip);
+  }
+
+  // -------- Movement bars (3 stamina bars below body bottom) --------
+  // Matches V1 style: same vertical spacing from body bottom edge, same
+  // thickness, same inter-segment gap, drawn inside the SVG so they
+  // rotate with the piece. One segment per movePoint; deplete left→right.
+  const mp = p.maxMovePoints;
+  const used = mp - p.movePoints;
+  const moveBarGap = 1.5;
+  const moveBarY = 34 + moveBarGap;  // body bottom at y=34, V1 spacing
+  const moveBarH = (window._moveThick !== undefined) ? window._moveThick : 4.5;
+  const moveBarHalfWidth = 30;  // body bottom is x=-30..30
+  const moveBarLeft = -moveBarHalfWidth;
+  const moveBarWidth = moveBarHalfWidth * 2;
+  const moveGapW = (window._moveGap !== undefined) ? window._moveGap : 5.6;
+  const moveSegW = (moveBarWidth - moveGapW * (mp - 1)) / mp;
+  for (let i = 0; i < mp; i++) {
+    const x = moveBarLeft + i * (moveSegW + moveGapW);
+    const rect = document.createElementNS(ns, 'rect');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', moveBarY);
+    rect.setAttribute('width', moveSegW);
+    rect.setAttribute('height', moveBarH);
+    rect.setAttribute('rx', 1);
+    rect.setAttribute('class', 'move-bar' + (i < (mp - used) ? ' available' : ' spent'));
+    svg.appendChild(rect);
+  }
+
+  exp.appendChild(svg);
+
+  // -------- Rotating content layer (turrets, bounty coins) --------
+  const rotatingContent = document.createElement('div');
+  rotatingContent.className = 'rotating-content';
+
+  const turrets = document.createElement('div');
+  turrets.className = 'castle-turrets-v2';
+  for (let i = 0; i < p.castleTurrets; i++) {
+    const t = document.createElement('div');
+    t.className = 'turret-icon-v2';
+    turrets.appendChild(t);
+  }
+  rotatingContent.appendChild(turrets);
+
+  const bountyContainer = document.createElement('div');
+  bountyContainer.className = 'bounty-coins-v2';
+  const bounty = killGold()[p.type];
+  const coinRadius  = (window._coinRadius  !== undefined) ? window._coinRadius  : 60;
+  const coinYOffset = (window._coinYOffset !== undefined) ? window._coinYOffset : 40;
+  const coinSpacing = (window._coinSpacing !== undefined) ? window._coinSpacing : 31;
+  if (bounty <= 2) {
+    for (let i = 0; i < bounty; i++) {
+      const c = document.createElement('div');
+      c.className = 'bounty-coin-v2';
+      const x = bounty === 1 ? 50 : (50 - coinSpacing/2 + i * coinSpacing);
+      c.style.left = x + '%';
+      c.style.top  = (50 + coinYOffset) + '%';
+      bountyContainer.appendChild(c);
+    }
+  } else {
+    const arcSpan = Math.min(180, coinSpacing * 0.5 + bounty * 18);
+    const startAngle = 90 - arcSpan / 2;
+    for (let i = 0; i < bounty; i++) {
+      const t = bounty === 1 ? 0.5 : i / (bounty - 1);
+      const angle = (startAngle + t * arcSpan) * Math.PI / 180;
+      const cx = 50 + Math.cos(angle) * coinRadius;
+      const cy = -10 + coinYOffset + Math.sin(angle) * coinRadius;
+      const c = document.createElement('div');
+      c.className = 'bounty-coin-v2';
+      c.style.left = cx + '%';
+      c.style.top  = cy + '%';
+      bountyContainer.appendChild(c);
+    }
+  }
+  rotatingContent.appendChild(bountyContainer);
+
+  rotatingContent.style.transform = svg.style.transform;
+  exp.appendChild(rotatingContent);
+
+  // -------- Content-fixed layer (central icon, doesn't rotate) --------
+  const content = document.createElement('div');
+  content.className = 'content-fixed';
+  const center = document.createElement('div');
+  center.className = 'body-center-v2';
+  center.appendChild(buildUnitIcon(p.type, p.owner));
+  content.appendChild(center);
+  exp.appendChild(content);
+
+  pe.appendChild(exp);
+  return pe;
+}
+
+
 function renderExperimentalPiece(p) {
+  // 2.31: V2 variants route to their own dedicated paint code instead of
+  // the spike-driven procedural renderer below.
+  if (p.variant === 'v2' && p.type === 'berserker') {
+    return renderBerserkerV2(p);
+  }
   const pe = document.createElement('div');
   const isSelected = state.selectedId === p.id;
   const isResumable = (state.resumablePieceIds && state.resumablePieceIds.has(p.id)) || state.resumablePieceId === p.id;
@@ -7179,6 +8075,60 @@ function onSquareClickBase(r, c) {
       // stamina is spent correctly.
       if (move.kind !== 'attack') resolvePendingTwinShot();
       if (move.kind === 'attack') { lockInput(450); doAttack(piece, r, c); }
+      else if (move.kind === 'move' && move.path && move.path.length > 1) {
+        // 2.16: multi-step path move. Chain doMove() calls with the
+        // animation slide duration between each step so the piece visibly
+        // walks the route. Lock input for the full path duration.
+        const stepDelay = 200; // a touch longer than .sliding's 180ms
+        const totalLock = stepDelay * move.path.length + 200;
+        lockInput(totalLock);
+        if (isExp && firstAction) {
+          state.activatedPieceId = piece.id;
+          consumePlayerAction();
+        }
+        // Clear the legal-moves overlay during the walk so the stale
+        // highlights from the starting position don't sit visible while
+        // the piece is animating between cells. selectPiece() will
+        // re-populate at the end if there's stamina left.
+        state.legalMoves = [];
+        state.legalRange = [];
+        state.canAttackEnemyCastle = false;
+        // Walk each step in sequence. We re-check piece.movePoints each
+        // step so if for some reason a step becomes illegal mid-walk (e.g.
+        // an animated piece moves into our path — shouldn't happen on
+        // player turn, but defensive), we bail gracefully.
+        let stepIdx = 0;
+        const walkNext = () => {
+          if (state.over) return;
+          const live = state.pieces.find(p => p.id === piece.id);
+          if (!live || live.movePoints <= 0) return;
+          const step = move.path[stepIdx];
+          if (!step) return;
+          // Verify the next cell is still empty. If something blocks (a
+          // theoretical race), stop the walk where we are.
+          if (occupant(step.row, step.col)) return;
+          doMove(live, step.row, step.col);
+          stepIdx++;
+          if (stepIdx < move.path.length) {
+            setTimeout(walkNext, stepDelay);
+          } else {
+            // Walk complete: refresh selection / clear if piece is spent.
+            setTimeout(() => {
+              if (state.over) return;
+              const liveAfter = state.pieces.find(p => p.id === piece.id);
+              if (liveAfter && liveAfter.movePoints > 0) {
+                selectPiece(liveAfter);
+              } else {
+                state.selectedId = null; state.legalMoves = []; state.legalRange = []; state.canAttackEnemyCastle = false;
+                state.activatedPieceId = null;
+                render();
+              }
+            }, stepDelay);
+          }
+        };
+        walkNext();
+        return; // skip the post-action block below — we handle it ourselves
+      }
       else { lockInput(320); doMove(piece, r, c); }
       if (isExp) {
         if (firstAction) {
@@ -7417,6 +8367,22 @@ function selectPiece(p) {
   state.selectedId = p.id;
   const { moves, canSiege } = legalMovesFor(p);
   state.legalMoves = moves;
+  // 2.16: in experimental mode, also expose all multi-step move
+  // destinations. The 1-step entries already in `moves` win when keys
+  // collide (we add multi-step only for cells not already covered).
+  // Each multi-step entry includes `path` so onSquareClick can replay
+  // the route via chained doMove() calls. AI uses the unmerged result
+  // from legalMovesFor directly so its scoring is unchanged.
+  if (gameMode === 'experimental' && p.owner === PLAYER) {
+    const haveCell = new Set();
+    for (const m of moves) haveCell.add(m.row + ',' + m.col);
+    const reachable = computeReachableCells(p);
+    for (const r of reachable) {
+      const k = r.row + ',' + r.col;
+      if (haveCell.has(k)) continue;
+      state.legalMoves.push({ row: r.row, col: r.col, kind: 'move', path: r.path });
+    }
+  }
   state.legalRange = computeAttackRange(p);
   state.canAttackEnemyCastle = canSiege;
   render();
@@ -7610,7 +8576,16 @@ function onSquareClick(r, c) {
   // 2.05: while the map editor is active, board taps mean "place / erase
   // a piece" instead of "select / move". Builder handler short-circuits
   // the normal flow entirely.
-  if (_builderActive) { builderHandleSquareClick(r, c); return; }
+  if (_builderActive) {
+    // 2.19: a completed drag-to-move sets suppressNextClick on the square
+    // because the browser fires a synthetic click after pointerup. Without
+    // this guard, the click would re-fire builderHandleSquareClick on the
+    // source cell and produce a spurious selection.
+    const sq = document.querySelector('.sq[data-row="' + r + '"][data-col="' + c + '"]');
+    if (sq && sq.dataset.suppressNextClick === '1') return;
+    builderHandleSquareClick(r, c);
+    return;
+  }
   if (hiringType) {
     // 1.90: in experimental mode the deploy overlay keeps the unit "armed"
     // across multiple placements — wrong-square taps log a warning without
@@ -7896,10 +8871,31 @@ let _builderActive = false;
 // in a normal game state, like "which side am I editing" and "armed tool")
 const _builderUI = {
   side: PLAYER,        // 'player' or 'enemy' — side currently being edited
-  armed: null,         // armed unit type ('archer'/'knight'/'footman'/'berserker') or 'erase'
+  armed: null,         // 2.19: 'select'/'erase'/unit-type. SELECT is now the default.
+  armedVariant: null,  // 2.31: when armed=unit-type, null = V1, 'v2' = V2 variant. Set by the V2 palette button.
   allowAnywhere: false,
   mirrorLive: false,   // 2.09: when true, edits mirror onto the opposite side automatically
   mirrorMode: 'vertical', // 2.10: 'vertical' (top↔bottom, same col) or 'rotate' (180° about board center)
+  // 2.29: optional rotation pivot. null = use bbox center. Otherwise
+  // { Ir, Ic } in intersection coordinates — Ir/Ic range from 0..ROWS
+  // and 0..COLS respectively, where (Ir, Ic) means the corner shared
+  // by cells (Ir-1, Ic-1), (Ir-1, Ic), (Ir, Ic-1), (Ir, Ic). Picked
+  // via the PIVOT button + tap.
+  pivot: null,
+  // 2.19: piece ids currently selected with the SELECT tool. Used by
+  // Phase 1 for single-piece highlight and as the foundation for
+  // Phase 2 multi-select / group transforms.
+  selectedIds: new Set(),
+  // 2.23: floating duplicate buffer. Replaces the 2.22 clipboard+pasteMode
+  // approach (where the user tapped a cell and pieces materialized with
+  // an invisible anchor — confusing, easy to lose pieces off-edge). The
+  // new flow: DUPLICATE creates an in-place ghost copy of the selection
+  // (visible exactly where the originals are, overlaid), the user drags
+  // any ghost piece to translate the whole group, and drop commits OR
+  // discards off-edge pieces (a deliberate gesture). The duplicate does
+  // NOT occupy state.board cells while floating — it's rendered on top
+  // of whatever's underneath.
+  floatingDup: null,  // array of { id, owner, type, row, col, facing } — synthetic ids prefixed "_dup_"
   rows: 7, cols: 7,
   playerHp: 12, enemyHp: 12,
 };
@@ -7908,6 +8904,14 @@ const _builderUI = {
 // (back row mirrors to back row, archer flanks stay flanking). ROTATE
 // also flips the column, producing a 180° rotation about the board centre
 // (lower-right places to upper-left). Facing flips by 180° either way.
+// 2.10/2.29: mirror geometry for MIRROR NOW + "mirror placements live".
+// Two modes:
+//   'vertical' = flip across horizontal centerline (top↕bottom). Row
+//                inverts, col stays. Default.
+//   'rotate'   = 180° rotation through the board center. Both row and
+//                col invert.
+// The diagonal modes added in 2.27 were removed in 2.29 — they only
+// worked on square boards and didn't pull their weight.
 function builderMirrorPos(row, col) {
   if (_builderUI.mirrorMode === 'rotate') {
     return { row: ROWS - 1 - row, col: COLS - 1 - col };
@@ -7915,9 +8919,15 @@ function builderMirrorPos(row, col) {
   // 'vertical' (default)
   return { row: ROWS - 1 - row, col };
 }
+// 2.29: facing reflection per mode. The pre-2.27 code used (f+4)%8 for
+// every mode, which is a 180° rotation. That's correct only for
+// 'rotate' mode — for 'vertical' it produced wrong results (NE→SW
+// instead of NE→SE). The per-mode lookup below fixes that quietly.
 function builderMirrorFacing(f) {
   if (typeof f !== 'number') return f;
-  return (f + 4) % 8;
+  if (_builderUI.mirrorMode === 'rotate') return (f + 4) % 8;
+  // 'vertical' — reflect across horizontal centerline.
+  return _BR_FACE_MIR_H[f];
 }
 function builderOtherSide(side) {
   return side === PLAYER ? ENEMY : PLAYER;
@@ -7935,12 +8945,14 @@ function builderOtherSide(side) {
 function builderBuildSlider(mountEl, opts) {
   // opts: { label, min, max, step, value, color, format, onInput }
   if (!mountEl) return null;
-  // If the dev-panel helpers aren't exposed (extremely defensive — they
-  // should be by the time this runs), fall back to a native slider so the
-  // UI doesn't break.
-  const trackFn  = window._brSliderTrack;
-  const handleFn = window._brSliderHandle;
-  const alphaFn  = window._brHexAlpha || ((h) => h);
+  // 2.14: the dev-panel exposes _brSliderTrack/_brSliderHandle on window
+  // FROM INSIDE setupDevPanel(). setupBuilder() (which calls us) runs
+  // BEFORE setupDevPanel() in source order, so capturing those helpers
+  // into local variables here means they'd be `undefined` at slider
+  // creation time and stay that way forever — the canvas would never
+  // paint. Look them up fresh inside redraw() instead, by which time
+  // setupDevPanel has run and the helpers are on window.
+  const alphaFn  = (h, a) => (window._brHexAlpha ? window._brHexAlpha(h, a) : h);
   const color    = opts.color || '#c89d3f';
   const fmt      = opts.format || ((v) => v.toFixed(0));
 
@@ -7989,6 +9001,10 @@ function builderBuildSlider(mountEl, opts) {
   valEl.textContent = fmt(parseFloat(sl.value));
 
   function redraw() {
+    // 2.14: look up the dev-panel drawing helpers fresh each draw so we
+    // pick them up even if setupDevPanel hadn't run yet at slider create.
+    const trackFn  = window._brSliderTrack;
+    const handleFn = window._brSliderHandle;
     const span = (+sl.max) - (+sl.min);
     const pct = span > 0 ? (parseFloat(sl.value) - (+sl.min)) / span : 0;
     if (trackFn)  trackFn(cv, pct, color);
@@ -8186,17 +9202,895 @@ function _builderRemoveAt(row, col, side) {
   state.pieces = state.pieces.filter(pp => pp.id !== p.id);
   return true;
 }
-function _builderPlaceAt(row, col, side, type, facing) {
+function _builderPlaceAt(row, col, side, type, facing, variant) {
   if (!pieceDefs()[type]) return null;
   if (row < 0 || row >= ROWS || col < 0 || col >= COLS) return null;
   // Remove anything already there (own or enemy — caller should have
   // gated this). Skips mirror-collision cases gracefully.
   _builderRemoveAt(row, col, null);
-  const sp = spawnPiece(side, type, row, col);
+  const sp = spawnPiece(side, type, row, col, variant);
   sp.facing = (typeof facing === 'number') ? facing : builderDefaultFacing(side);
   sp.acted = false;
   if (typeof sp.movePoints === 'number') sp.movePoints = sp.maxMovePoints;
   return sp;
+}
+
+// ==========================================================================
+// 2.19: tap-and-drag to move pieces in the editor
+// --------------------------------------------------------------------------
+// Each board square gets pointer handlers that detect a drag gesture
+// starting on a piece: pointerdown captures origin, pointermove past a
+// small threshold transitions into "dragging" mode (ghost element appears
+// and follows the finger, source square fades), pointerup over an empty
+// destination cell executes a move (with undo history). A pure tap with
+// no movement falls through to builderHandleSquareClick (so SELECT mode
+// still works for click-to-select).
+//
+// State is module-scoped because only one drag can be active at a time.
+// ==========================================================================
+const _drag = {
+  active: false,
+  pointerId: null,
+  pieceId: null,
+  startX: 0, startY: 0,
+  srcSq: null,
+  ghost: null,
+  hoverSq: null,
+  hoverValid: false,
+  // Threshold past which a press becomes a drag.
+  MOVE_THRESHOLD_PX: 14,
+  // 2.22: if the dragged piece is part of a multi-selection, all the
+  // selected pieces move together by the same delta. groupIds is the
+  // list of piece ids being dragged (always includes pieceId; for a
+  // single-piece drag it's just [pieceId]). hoverGroupSqs collects the
+  // currently-highlighted destination squares so we can clear them when
+  // the hover changes.
+  groupIds: [],
+  hoverGroupSqs: [],
+  hoverGroupValid: false,
+  // 2.23: tracks whether the current drag is on a real on-board piece
+  // ('piece') or a floating duplicate ('dup'). Anchor for dup drags is
+  // stored separately because dups aren't in state.pieces.
+  dragKind: null,
+  anchorDup: null,
+  dupDests: null,
+};
+
+function _builderClearDragVisuals() {
+  if (_drag.ghost) { try { _drag.ghost.remove(); } catch (_) {} _drag.ghost = null; }
+  if (_drag.srcSq) { _drag.srcSq.classList.remove('builder-drag-source'); _drag.srcSq = null; }
+  if (_drag.hoverSq) {
+    _drag.hoverSq.classList.remove('builder-drag-target', 'builder-drag-target-invalid');
+    _drag.hoverSq = null;
+  }
+  // 2.22: also clear group-drag highlights.
+  for (const sq of _drag.hoverGroupSqs) {
+    sq.classList.remove('builder-drag-target', 'builder-drag-target-invalid');
+  }
+  _drag.hoverGroupSqs = [];
+  _drag.hoverGroupValid = false;
+  // 2.22: dim sources for the rest of the group too.
+  if (_drag.groupIds && _drag.groupIds.length > 1) {
+    for (const id of _drag.groupIds) {
+      // 2.23: dup-drag ids are synthetic ("_dup_N"); they live in
+      // floatingDup, not state.pieces. Look up there if needed.
+      let r, c;
+      if (typeof id === 'string' && id.indexOf('_dup_') === 0) {
+        const d = _builderUI.floatingDup && _builderUI.floatingDup.find(d => d.id === id);
+        if (!d) continue;
+        r = d.row; c = d.col;
+      } else {
+        const p = state.pieces.find(pp => pp.id === id);
+        if (!p) continue;
+        r = p.row; c = p.col;
+      }
+      const sq = document.querySelector('.sq[data-row="' + r + '"][data-col="' + c + '"]');
+      if (sq) sq.classList.remove('builder-drag-source');
+    }
+  }
+  _drag.groupIds = [];
+}
+function _builderEndDrag() {
+  _drag.active = false;
+  _drag.pointerId = null;
+  _drag.pieceId = null;
+  _drag.hoverValid = false;
+  // 2.23: clear dup-drag state too.
+  _drag.dragKind = null;
+  _drag.anchorDup = null;
+  _drag.dupDests = null;
+  _builderClearDragVisuals();
+}
+function _builderCellFromPoint(x, y) {
+  const el = document.elementFromPoint(x, y);
+  if (!el) return null;
+  const sq = el.closest && el.closest('.sq');
+  if (!sq) return null;
+  const r = parseInt(sq.dataset.row, 10);
+  const c = parseInt(sq.dataset.col, 10);
+  if (Number.isNaN(r) || Number.isNaN(c)) return null;
+  return { sq, row: r, col: c };
+}
+function _builderUpdateGhost(x, y) {
+  if (_drag.ghost) {
+    _drag.ghost.style.left = x + 'px';
+    _drag.ghost.style.top  = y + 'px';
+  }
+}
+function _builderUpdateHover(x, y) {
+  const hit = _builderCellFromPoint(x, y);
+  // Clear previous single-cell hover.
+  if (_drag.hoverSq && (!hit || hit.sq !== _drag.hoverSq)) {
+    _drag.hoverSq.classList.remove('builder-drag-target', 'builder-drag-target-invalid');
+    _drag.hoverSq = null;
+    _drag.hoverValid = false;
+  }
+  // 2.22: also clear group hover cells.
+  for (const sq of _drag.hoverGroupSqs) {
+    sq.classList.remove('builder-drag-target', 'builder-drag-target-invalid');
+  }
+  _drag.hoverGroupSqs = [];
+  _drag.hoverGroupValid = false;
+  // 2.23: clear per-dup destinations and their stored positions.
+  _drag.dupDests = null;
+
+  if (!hit) return;
+
+  // ============================================================
+  // 2.23: DUP DRAG PATH.
+  // Each dup piece has its own dest cell. We mark each green if it
+  // would land valid, red if it would land off-edge or on an existing
+  // piece. The "drop is allowed" flag is true as long as at least one
+  // dup would land somewhere valid AND no dup would collide with a
+  // real on-board piece. Off-edge dups are intentional discards.
+  // ============================================================
+  if (_drag.dragKind === 'dup') {
+    const anchor = _drag.anchorDup;
+    if (!anchor) return;
+    const dr = hit.row - anchor.row;
+    const dc = hit.col - anchor.col;
+    const destInfos = [];
+    let anyValid = false;
+    let anyCollision = false;
+    for (const d of _builderUI.floatingDup) {
+      const nr = d.row + dr, nc = d.col + dc;
+      const offBoard = !inBounds(nr, nc);
+      let zoneOk = true;
+      let collision = false;
+      if (!offBoard) {
+        const occ = state.board[nr][nc];
+        if (occ) collision = true;
+        if (!_builderUI.allowAnywhere) {
+          const halfBoundary = Math.floor(ROWS / 2);
+          zoneOk = (d.owner === PLAYER) ? (nr >= halfBoundary) : (nr < halfBoundary);
+        }
+      }
+      const valid = !offBoard && !collision && zoneOk;
+      if (valid) anyValid = true;
+      if (collision) anyCollision = true;
+      destInfos.push({ nr, nc, offBoard, collision, zoneOk, valid });
+    }
+    // Highlight each in-bounds destination according to its individual
+    // validity. Off-board ones can't be highlighted (no square exists).
+    for (const info of destInfos) {
+      if (info.offBoard) continue;
+      const sq = document.querySelector('.sq[data-row="' + info.nr + '"][data-col="' + info.nc + '"]');
+      if (!sq) continue;
+      const cls = info.valid ? 'builder-drag-target' : 'builder-drag-target-invalid';
+      sq.classList.add(cls);
+      _drag.hoverGroupSqs.push(sq);
+    }
+    // The drop is "OK to release" if at least one piece will land
+    // somewhere valid AND no piece would collide with existing on-board
+    // pieces. Off-edge pieces alone don't block (user wants those gone).
+    _drag.hoverGroupValid = anyValid && !anyCollision;
+    _drag.dupDests = destInfos;
+    return;
+  }
+
+  // ============================================================
+  // Normal piece-drag path (Phase 1 single + 2.22 group).
+  // ============================================================
+  const piece = state.pieces.find(p => p.id === _drag.pieceId);
+  if (!piece) return;
+  const isGroup = _drag.groupIds && _drag.groupIds.length > 1;
+
+  if (!isGroup) {
+    // Single-piece drag (original Phase 1 logic).
+    const isSelf = (hit.row === piece.row && hit.col === piece.col);
+    const occ = state.board[hit.row] && state.board[hit.row][hit.col];
+    const targetEmpty = !occ;
+    let zoneOk = true;
+    if (!_builderUI.allowAnywhere) {
+      const halfBoundary = Math.floor(ROWS / 2);
+      zoneOk = (piece.owner === PLAYER) ? (hit.row >= halfBoundary) : (hit.row < halfBoundary);
+    }
+    const valid = isSelf || (targetEmpty && zoneOk);
+    hit.sq.classList.add(valid ? 'builder-drag-target' : 'builder-drag-target-invalid');
+    _drag.hoverSq = hit.sq;
+    _drag.hoverValid = valid;
+    return;
+  }
+
+  // 2.22: GROUP drag of real pieces. Same as before.
+  const dr = hit.row - piece.row;
+  const dc = hit.col - piece.col;
+  const sourceCells = new Set(_drag.groupIds.map(id => {
+    const p = state.pieces.find(pp => pp.id === id);
+    return p ? (p.row + ',' + p.col) : null;
+  }).filter(Boolean));
+  const destCells = [];
+  let allValid = true;
+  for (const id of _drag.groupIds) {
+    const p = state.pieces.find(pp => pp.id === id);
+    if (!p) { allValid = false; continue; }
+    const nr = p.row + dr, nc = p.col + dc;
+    if (!inBounds(nr, nc)) { allValid = false; continue; }
+    const occ = state.board[nr][nc];
+    const occupiedByOther = occ && !sourceCells.has(nr + ',' + nc);
+    if (occupiedByOther) { allValid = false; }
+    if (!_builderUI.allowAnywhere) {
+      const halfBoundary = Math.floor(ROWS / 2);
+      const zoneOk = (p.owner === PLAYER) ? (nr >= halfBoundary) : (nr < halfBoundary);
+      if (!zoneOk) allValid = false;
+    }
+    destCells.push({ nr, nc });
+  }
+  _drag.hoverGroupValid = allValid;
+  const cls = allValid ? 'builder-drag-target' : 'builder-drag-target-invalid';
+  for (const { nr, nc } of destCells) {
+    const sq = document.querySelector('.sq[data-row="' + nr + '"][data-col="' + nc + '"]');
+    if (sq) {
+      sq.classList.add(cls);
+      _drag.hoverGroupSqs.push(sq);
+    }
+  }
+}
+// 2.23: begin a drag of the floating duplicate. The dup is treated as a
+// group of cells; the anchor is the dup-entry the user grabbed. All
+// other dup entries move by the same delta. Renders ghost element from
+// the anchor's cell (which has the gold-halo ghost already drawn).
+function _builderBeginDupDrag(anchor, x, y) {
+  const srcSq = document.querySelector(
+    '.sq[data-row="' + anchor.row + '"][data-col="' + anchor.col + '"]'
+  );
+  if (!srcSq) return;
+  _drag.srcSq = srcSq;
+  srcSq.classList.add('builder-drag-source');
+  // groupIds for dup drags are the dup entry ids (synthetic).
+  _drag.groupIds = _builderUI.floatingDup.map(d => d.id);
+  // Visually dim all dup source cells.
+  for (const d of _builderUI.floatingDup) {
+    if (d.id === anchor.id) continue;
+    const s = document.querySelector('.sq[data-row="' + d.row + '"][data-col="' + d.col + '"]');
+    if (s) s.classList.add('builder-drag-source');
+  }
+  // Build ghost from anchor's ghost element.
+  const ghostSrc = srcSq.querySelector('.builder-dup-ghost') || srcSq.querySelector('.piece');
+  const ghost = document.createElement('div');
+  ghost.className = 'builder-drag-ghost';
+  const r = srcSq.getBoundingClientRect();
+  ghost.style.width  = r.width + 'px';
+  ghost.style.height = r.height + 'px';
+  if (ghostSrc) {
+    const clone = ghostSrc.cloneNode(true);
+    clone.style.pointerEvents = 'none';
+    clone.style.position = 'relative';
+    clone.style.width = '100%';
+    clone.style.height = '100%';
+    ghost.appendChild(clone);
+  }
+  document.body.appendChild(ghost);
+  _drag.ghost = ghost;
+  _drag.active = true;
+  // Store the anchor dup so the hover/commit logic knows the dup origin.
+  _drag.anchorDup = anchor;
+  _builderUpdateGhost(x, y);
+  _builderUpdateHover(x, y);
+  sfx.uiTap();
+}
+function _builderBeginDrag(piece, x, y) {
+  // Build a ghost element: a small badge with the piece's icon-like
+  // appearance. To keep it light we just take a snapshot-styled square
+  // from the existing rendered piece, not a full re-render.
+  const srcSq = document.querySelector(
+    '.sq[data-row="' + piece.row + '"][data-col="' + piece.col + '"]'
+  );
+  if (!srcSq) return;
+  _drag.srcSq = srcSq;
+  srcSq.classList.add('builder-drag-source');
+  // 2.22: if the grabbed piece is part of a multi-selection, this is a
+  // GROUP drag. Mark all the other source squares too so the user sees
+  // the whole group lifting. Otherwise just this one piece moves.
+  if (_builderUI.selectedIds.has(piece.id) && _builderUI.selectedIds.size > 1) {
+    _drag.groupIds = Array.from(_builderUI.selectedIds);
+    for (const id of _drag.groupIds) {
+      if (id === piece.id) continue;
+      const p = state.pieces.find(pp => pp.id === id);
+      if (!p) continue;
+      const s = document.querySelector('.sq[data-row="' + p.row + '"][data-col="' + p.col + '"]');
+      if (s) s.classList.add('builder-drag-source');
+    }
+  } else {
+    _drag.groupIds = [piece.id];
+  }
+  // Clone the rendered piece visual.
+  const pieceEl = srcSq.querySelector('.piece');
+  const ghost = document.createElement('div');
+  ghost.className = 'builder-drag-ghost';
+  // Match the source square's size.
+  const r = srcSq.getBoundingClientRect();
+  ghost.style.width  = r.width + 'px';
+  ghost.style.height = r.height + 'px';
+  if (pieceEl) {
+    const clone = pieceEl.cloneNode(true);
+    // Strip pointer-events / animations from clone.
+    clone.style.pointerEvents = 'none';
+    clone.style.position = 'relative';
+    clone.style.width = '100%';
+    clone.style.height = '100%';
+    ghost.appendChild(clone);
+  }
+  document.body.appendChild(ghost);
+  _drag.ghost = ghost;
+  _drag.active = true;
+  _builderUpdateGhost(x, y);
+  _builderUpdateHover(x, y);
+  sfx.uiTap();
+}
+
+function attachBuilderDragHandlers(sq, row, col) {
+  sq.addEventListener('pointerdown', (e) => {
+    if (!_builderActive) return;
+    if (e.button !== undefined && e.button !== 0 && e.pointerType === 'mouse') return;
+    // 2.23: prefer the floating-dup at this cell if one exists. The
+    // dup pieces don't live in state.board, so we look them up in
+    // _builderUI.floatingDup. When the user drags any dup cell, the
+    // whole dup group moves as one. (Implemented via the existing
+    // groupIds path in the drag flow but with isDupDrag = true so the
+    // commit goes to floating buffer instead of mutating board pieces.)
+    let dragPieceRef = null;
+    if (_builderUI.floatingDup && _builderUI.floatingDup.length > 0) {
+      const dupHere = _builderUI.floatingDup.find(d => d.row === row && d.col === col);
+      if (dupHere) dragPieceRef = { kind: 'dup', dup: dupHere };
+    }
+    if (!dragPieceRef) {
+      // Regular piece on the board.
+      const cell = state.board[row] && state.board[row][col];
+      if (!cell || cell.kind !== 'piece') return;
+      dragPieceRef = { kind: 'piece', id: cell.id };
+    }
+    // We DON'T preventDefault here — a quick tap should still fire the
+    // click handler. We only intercept once movement crosses threshold.
+    _drag.pointerId = e.pointerId;
+    _drag.dragKind  = dragPieceRef.kind; // 'piece' or 'dup'
+    _drag.pieceId   = dragPieceRef.kind === 'piece' ? dragPieceRef.id : dragPieceRef.dup.id;
+    _drag.startX = e.clientX;
+    _drag.startY = e.clientY;
+    _drag.active = false; // not yet — wait for movement
+    // 2.20: capture the pointer EARLY ...
+    try { sq.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  sq.addEventListener('pointermove', (e) => {
+    if (!_builderActive) return;
+    if (_drag.pointerId !== e.pointerId || !_drag.pieceId) return;
+    if (!_drag.active) {
+      const dx = e.clientX - _drag.startX, dy = e.clientY - _drag.startY;
+      if (dx * dx + dy * dy > _drag.MOVE_THRESHOLD_PX * _drag.MOVE_THRESHOLD_PX) {
+        // 2.23: resolve the anchor — either a real piece or a floating-dup
+        // entry. Same drag visuals either way; commit logic diverges.
+        if (_drag.dragKind === 'dup') {
+          const dup = _builderUI.floatingDup && _builderUI.floatingDup.find(d => d.id === _drag.pieceId);
+          if (dup) _builderBeginDupDrag(dup, e.clientX, e.clientY);
+        } else {
+          const piece = state.pieces.find(p => p.id === _drag.pieceId);
+          if (piece) _builderBeginDrag(piece, e.clientX, e.clientY);
+        }
+      }
+    } else {
+      _builderUpdateGhost(e.clientX, e.clientY);
+      _builderUpdateHover(e.clientX, e.clientY);
+    }
+  });
+  sq.addEventListener('pointerup', (e) => {
+    if (!_builderActive) return;
+    if (_drag.pointerId !== e.pointerId) return;
+    if (_drag.active) {
+      // Commit or cancel the drag.
+      const hit = _builderCellFromPoint(e.clientX, e.clientY);
+
+      // ============================================================
+      // 2.23: DUP DRAG COMMIT.
+      // The dup drag uses _drag.dupDests built by _builderUpdateHover.
+      // Place every in-bounds + non-colliding + zone-ok dup at its
+      // destination; silently discard off-board or zone-violating
+      // entries. Block the whole drop if anything would collide with
+      // an existing on-board piece (anyCollision was set in hover).
+      // ============================================================
+      if (_drag.dragKind === 'dup') {
+        const dests = _drag.dupDests || [];
+        const dup   = _builderUI.floatingDup || [];
+        if (!_drag.hoverGroupValid) {
+          // anyValid===false (nothing would land) or anyCollision===true:
+          // drop is blocked. Leave the dup at its current floating spot.
+          sfx.uiDeny();
+        } else {
+          builderPushHistory();
+          const newIds = new Set();
+          let placed = 0, discarded = 0;
+          for (let i = 0; i < dup.length; i++) {
+            const info = dests[i];
+            if (!info || !info.valid) { discarded++; continue; }
+            const d = dup[i];
+            _builderPlaceAt(info.nr, info.nc, d.owner, d.type, d.facing, d.variant);
+            const real = state.pieces.find(p => p.row === info.nr && p.col === info.nc);
+            if (real) { newIds.add(real.id); placed++; }
+          }
+          _builderUI.floatingDup = null;
+          _builderUI.selectedIds = newIds;
+          sfx.uiPlace();
+          if (discarded > 0) builderFlashHint('placed ' + placed + ' (' + discarded + ' off-edge)');
+          else builderFlashHint('placed ' + placed);
+          builderRefreshSelectionUI();
+          render();
+          builderTagZones();
+        }
+        _builderEndDrag();
+        try { sq.releasePointerCapture(e.pointerId); } catch (_) {}
+        sq.dataset.suppressNextClick = '1';
+        setTimeout(() => { sq.dataset.suppressNextClick = ''; }, 50);
+        return;
+      }
+
+      // Regular piece-drag commit (Phase 1 single + 2.22 group).
+      const piece = state.pieces.find(p => p.id === _drag.pieceId);
+      const droppedOnSelf = piece && hit &&
+        hit.row === piece.row && hit.col === piece.col;
+      const isGroup = _drag.groupIds && _drag.groupIds.length > 1;
+      if (isGroup) {
+        // 2.22: GROUP commit. Translate every selected piece by the
+        // anchor's delta. We've already validated in _builderUpdateHover
+        // that all destinations are empty (or own-group) and in-zone.
+        if (piece && hit && _drag.hoverGroupValid && !droppedOnSelf) {
+          const dr = hit.row - piece.row;
+          const dc = hit.col - piece.col;
+          builderPushHistory();
+          // Lift every group piece from the board first to avoid
+          // collisions during the move (since we slide the group over
+          // its own footprint as a valid operation).
+          const moving = [];
+          for (const id of _drag.groupIds) {
+            const p = state.pieces.find(pp => pp.id === id);
+            if (!p) continue;
+            state.board[p.row][p.col] = null;
+            moving.push(p);
+          }
+          // Now place each at its new home.
+          for (const p of moving) {
+            p.row += dr;
+            p.col += dc;
+            state.board[p.row][p.col] = { kind: 'piece', id: p.id };
+          }
+          sfx.uiPlace();
+          render();
+          builderTagZones();
+        } else if (!droppedOnSelf) {
+          sfx.uiDeny();
+        }
+      } else {
+        if (piece && hit && _drag.hoverValid && !droppedOnSelf) {
+          // Single-piece move (original Phase 1 behavior).
+          builderPushHistory();
+          state.board[piece.row][piece.col] = null;
+          piece.row = hit.row; piece.col = hit.col;
+          state.board[hit.row][hit.col] = { kind: 'piece', id: piece.id };
+          sfx.uiPlace();
+          render();
+          builderTagZones();
+        } else if (!droppedOnSelf) {
+          sfx.uiDeny();
+        }
+      }
+      _builderEndDrag();
+      try { sq.releasePointerCapture(e.pointerId); } catch (_) {}
+      // Drag completed — suppress the synthetic click that would otherwise
+      // follow the pointerup (which would re-select / re-fire).
+      sq.dataset.suppressNextClick = '1';
+      setTimeout(() => { sq.dataset.suppressNextClick = ''; }, 50);
+    } else {
+      // No drag occurred — let the normal click handler fire.
+      // 2.20: also release the pointer capture we set at pointerdown,
+      // otherwise the browser holds the capture until the element is
+      // removed (each render rebuilds squares, so it'd self-clear, but
+      // releasing here keeps things tidy).
+      try { sq.releasePointerCapture(e.pointerId); } catch (_) {}
+      _drag.pointerId = null;
+      _drag.pieceId = null;
+    }
+  });
+  sq.addEventListener('pointercancel', (e) => {
+    if (_drag.active) _builderEndDrag();
+    try { sq.releasePointerCapture(e.pointerId); } catch (_) {}
+    _drag.pointerId = null; _drag.pieceId = null;
+  });
+}
+
+// ==========================================================================
+// 2.22: Phase 2A — multi-select, group ops, copy/paste
+// --------------------------------------------------------------------------
+// Helpers shared by the SELECT-mode click handler, the bulk-select buttons
+// (ALL / YOURS / FOE / NONE), the COPY/PASTE/DELETE buttons, and the
+// group-drag code in attachBuilderDragHandlers. The selection itself lives
+// on _builderUI.selectedIds; everything here just reads or mutates that
+// set and refreshes the UI.
+// ==========================================================================
+
+// Quick lookup: is a given piece id currently selected?
+function builderIsSelected(id) {
+  return _builderUI.selectedIds.has(id);
+}
+// Bulk-select operations used by the SELECT ALL / SELECT YOURS / FOE
+// buttons. Each replaces the current selection (rather than adding to it)
+// because that's the obvious behavior for a "select all of X" command.
+function builderSelectAll(filter) {
+  _builderUI.selectedIds.clear();
+  for (const p of state.pieces) {
+    if (!filter || filter(p)) _builderUI.selectedIds.add(p.id);
+  }
+  builderRefreshSelectionUI();
+  render();
+  builderTagZones();
+}
+function builderClearSelection() {
+  if (_builderUI.selectedIds.size === 0) return;
+  _builderUI.selectedIds.clear();
+  builderRefreshSelectionUI();
+  render();
+  builderTagZones();
+}
+// DELETE: remove every selected piece from the board. Pushes one undo
+// snapshot so the whole operation reverts as a unit.
+function builderDeleteSelection() {
+  if (_builderUI.selectedIds.size === 0) { sfx.uiDeny(); return; }
+  builderPushHistory();
+  const ids = new Set(_builderUI.selectedIds);
+  state.pieces = state.pieces.filter(p => {
+    if (!ids.has(p.id)) return true;
+    state.board[p.row][p.col] = null;
+    return false;
+  });
+  _builderUI.selectedIds.clear();
+  sfx.uiCommit();
+  builderRefreshSelectionUI();
+  render();
+  builderTagZones();
+}
+// 2.23: DUPLICATE flow — replaces 2.22's COPY/PASTE mode.
+// Creates a floating ghost copy of the current selection (in place,
+// overlapping the originals). The user drags any ghost piece to translate
+// the whole duplicate group; on drop, valid placements commit, off-edge
+// placements are discarded (deliberate gesture), and collisions block
+// the drop entirely.
+//
+// While a floating duplicate exists, _builderUI.selectedIds points at the
+// duplicate's synthetic ids (prefixed "_dup_") rather than real piece ids.
+// The render layer (see builderRenderFloatingDup) draws the ghost pieces
+// as overlays on their current cells. Drag handlers detect a tap on a
+// cell that has a floating-dup ghost there and route to the floating-dup
+// drag path instead of regular piece-drag.
+// =========================================================================
+// 2.26: Phase 2B — group rotate + mirror across axis
+// -------------------------------------------------------------------------
+// Operations on _builderUI.selectedIds. Each:
+//   - Computes new (row, col, facing) for every selected piece
+//   - Checks conflict (any destination on a non-selected piece's cell?)
+//   - If clean: pushes history, lifts all selected pieces from board,
+//     puts them at their new positions (with new facings, maybe color
+//     swap for single-color mirror)
+//   - If conflict: deny beep, leaves things alone
+// Off-board destinations are silently dropped (e.g. diagonal mirror on
+// asymmetric board can push some pieces out).
+//
+// Facing math is enumerated below. Position math is straight bbox-pivot
+// rotation / axis-line reflection.
+// =========================================================================
+
+// Facing reindex tables. Facings: 0=N, 1=NE, 2=E, 3=SE, 4=S, 5=SW, 6=W, 7=NW.
+const _BR_FACE_ROT_CW  = [2, 3, 4, 5, 6, 7, 0, 1]; // rotate piece 90° CW
+const _BR_FACE_ROT_CCW = [6, 7, 0, 1, 2, 3, 4, 5]; // rotate 90° CCW
+// Mirror across horizontal axis (top↕bottom swap): N↔S, NE↔SE, NW↔SW, E/W stay.
+const _BR_FACE_MIR_H   = [4, 3, 2, 1, 0, 7, 6, 5];
+// Mirror across vertical axis (left↔right swap): E↔W, NE↔NW, SE↔SW, N/S stay.
+const _BR_FACE_MIR_V   = [0, 7, 6, 5, 4, 3, 2, 1];
+// Mirror across main diagonal (NW-SE line): N↔W, E↔S, NE↔SW, SE/NW stay.
+const _BR_FACE_MIR_D1  = [6, 5, 4, 3, 2, 1, 0, 7];
+// Mirror across anti-diagonal (NE-SW line): N↔E, S↔W, SE↔NW, NE/SW stay.
+const _BR_FACE_MIR_D2  = [2, 1, 0, 7, 6, 5, 4, 3];
+
+// Compute bounding-box center of the current selection (real pieces only;
+// excludes floating dup). Returns null when no selection.
+function _builderSelectionBBoxCenter() {
+  const ids = _builderUI.selectedIds;
+  if (!ids || ids.size === 0) return null;
+  let minR = Infinity, maxR = -Infinity, minC = Infinity, maxC = -Infinity;
+  let count = 0;
+  for (const p of state.pieces) {
+    if (!ids.has(p.id)) continue;
+    if (p.row < minR) minR = p.row;
+    if (p.row > maxR) maxR = p.row;
+    if (p.col < minC) minC = p.col;
+    if (p.col > maxC) maxC = p.col;
+    count++;
+  }
+  if (count === 0) return null;
+  // Center may be half-integer (e.g. 2-wide selection → center at 0.5).
+  // That's fine for rotation math; we just round at the end.
+  return { pr: (minR + maxR) / 2, pc: (minC + maxC) / 2, count };
+}
+
+// Generic group-transform runner. Given a function that maps each piece
+// to its new (row, col, facing), execute the move atomically with
+// conflict-checking and history. ownerSwap: if true, also flip each
+// piece's owner (used by single-color mirror).
+function _builderApplyGroupTransform(transformFn, ownerSwap, opLabel) {
+  const ids = _builderUI.selectedIds;
+  if (!ids || ids.size === 0) { sfx.uiDeny(); return; }
+  // Don't allow these operations while a floating dup is active —
+  // the dup uses synthetic ids that don't exist in state.pieces, and
+  // it'd be confusing to mix the two flows. User can commit/cancel
+  // the dup first.
+  if (_builderUI.floatingDup) {
+    sfx.uiDeny();
+    builderFlashHint('commit or cancel the duplicate first');
+    return;
+  }
+  const sel = state.pieces.filter(p => ids.has(p.id));
+  if (sel.length === 0) { sfx.uiDeny(); return; }
+
+  // Compute proposed new positions and facings for every selected piece.
+  // Off-board destinations are skipped (they don't reserve a slot).
+  const proposals = [];
+  let offBoard = 0;
+  for (const p of sel) {
+    const t = transformFn(p);
+    if (!t) { offBoard++; continue; }
+    if (!inBounds(t.row, t.col)) { offBoard++; continue; }
+    proposals.push({ piece: p, row: t.row, col: t.col, facing: t.facing });
+  }
+  if (proposals.length === 0) {
+    sfx.uiDeny();
+    builderFlashHint(opLabel + ': everything off-board');
+    return;
+  }
+
+  // Build set of source cells (so we can ignore in-group "collisions"
+  // — the group sliding over its own footprint is fine).
+  const sourceCells = new Set(sel.map(p => p.row + ',' + p.col));
+  // Also ensure no two pieces in the group propose the SAME destination
+  // — that would be a self-collision after transform. Shouldn't happen
+  // for clean rotations/reflections, but guard against it.
+  const destCells = new Set();
+  for (const prop of proposals) {
+    const k = prop.row + ',' + prop.col;
+    if (destCells.has(k)) {
+      sfx.uiDeny();
+      builderFlashHint(opLabel + ' would overlap pieces');
+      return;
+    }
+    destCells.add(k);
+  }
+  // Check destinations against non-selected pieces on the board.
+  for (const prop of proposals) {
+    const occ = state.board[prop.row][prop.col];
+    if (occ && occ.kind === 'piece' && !ids.has(occ.id)) {
+      sfx.uiDeny();
+      builderFlashHint(opLabel + ' blocked by other pieces');
+      return;
+    }
+  }
+
+  // All clear. Commit.
+  builderPushHistory();
+  // Lift all selected pieces from the board first.
+  for (const p of sel) state.board[p.row][p.col] = null;
+  // Pieces that went off-board: remove from state.pieces entirely.
+  const survivingIds = new Set(proposals.map(pr => pr.piece.id));
+  state.pieces = state.pieces.filter(p => !ids.has(p.id) || survivingIds.has(p.id));
+  // Place survivors at their new positions; update facing and (if
+  // ownerSwap) owner.
+  const newSelectedIds = new Set();
+  for (const prop of proposals) {
+    const p = prop.piece;
+    p.row = prop.row;
+    p.col = prop.col;
+    p.facing = prop.facing;
+    if (ownerSwap) p.owner = (p.owner === PLAYER) ? ENEMY : PLAYER;
+    state.board[p.row][p.col] = { kind: 'piece', id: p.id };
+    newSelectedIds.add(p.id);
+  }
+  _builderUI.selectedIds = newSelectedIds;
+  sfx.uiPlace();
+  if (offBoard > 0) builderFlashHint(opLabel + ' (' + offBoard + ' off-board)');
+  else builderFlashHint(opLabel);
+  builderRefreshSelectionUI();
+  render();
+  builderTagZones();
+}
+
+function builderRotateSelection(direction) {
+  if (!_builderUI.selectedIds || _builderUI.selectedIds.size === 0) {
+    sfx.uiDeny(); return;
+  }
+  // 2.29: if a custom pivot is set (via the PIVOT button), use that as
+  // the rotation center; otherwise fall back to the selection's
+  // bounding-box center. Intersection (Ir, Ic) is the corner shared by
+  // cells (Ir-1, Ic-1)..(Ir, Ic), so its pivot coordinate in cell space
+  // is (Ir - 0.5, Ic - 0.5) — half-integer offsets keep all rotated
+  // cells on integer cell positions.
+  let pr, pc, label;
+  if (_builderUI.pivot) {
+    pr = _builderUI.pivot.Ir - 0.5;
+    pc = _builderUI.pivot.Ic - 0.5;
+    label = (direction === 'cw' ? '↻' : '↺') + ' around pivot';
+  } else {
+    const ctr = _builderSelectionBBoxCenter();
+    if (!ctr) { sfx.uiDeny(); return; }
+    pr = ctr.pr;
+    pc = ctr.pc;
+    label = 'rotated ' + (direction === 'cw' ? '↻' : '↺');
+  }
+  const faceMap = (direction === 'cw') ? _BR_FACE_ROT_CW : _BR_FACE_ROT_CCW;
+  _builderApplyGroupTransform(p => {
+    const dr = p.row - pr;
+    const dc = p.col - pc;
+    let nr, nc;
+    if (direction === 'cw') {
+      // (dr, dc) → (dc, -dr) for 90° CW in screen coords (row down, col right)
+      nr = pr + dc;
+      nc = pc - dr;
+    } else {
+      // CCW: (dr, dc) → (-dc, dr)
+      nr = pr - dc;
+      nc = pc + dr;
+    }
+    return { row: Math.round(nr), col: Math.round(nc), facing: faceMap[p.facing] };
+  }, false, label);
+}
+
+// 2.27: builderMirrorSelection (the Phase 2B in-place mirror) was removed
+// here — its functionality duplicated MIRROR NOW with worse semantics
+// (replacing originals instead of keeping them). The face-map constants
+// _BR_FACE_MIR_H/V/D1/D2 above ARE still used — by the live MIRROR NOW
+// system below, to compute correct per-axis facing reflections (see
+// builderMirrorFacing).
+
+function builderDuplicateSelection() {
+  if (_builderUI.selectedIds.size === 0) { sfx.uiDeny(); return; }
+  const realIds = new Set(_builderUI.selectedIds);
+  const sel = state.pieces.filter(p => realIds.has(p.id));
+  if (sel.length === 0) { sfx.uiDeny(); return; }
+  // Cancel any existing floating dup before starting a new one.
+  if (_builderUI.floatingDup) builderCancelFloatingDup();
+  // 2.25: snapshot a FULL deep copy of each selected piece — not just
+  // the minimal {owner,type,facing,row,col} we used before. Previous
+  // version was missing fields like `spikes`, `castleTurrets`,
+  // `bonusMaxHp`, etc. that renderExperimentalPiece requires; the
+  // render threw mid-loop on `p.spikes[dir]`, leaving the dup in a
+  // half-rendered state that disappeared on the next interaction.
+  // Storing the full piece data also makes commit a clean restore.
+  // Each dup gets a synthetic id prefix so the drag handler can route.
+  let synth = 0;
+  _builderUI.floatingDup = sel.map(p => {
+    // Shallow clone the piece, then deep-clone the array fields so we
+    // don't share state with the originals.
+    const copy = { ...p };
+    if (Array.isArray(p.spikes))     copy.spikes     = p.spikes.slice();
+    if (Array.isArray(p.baseSpikes)) copy.baseSpikes = p.baseSpikes.slice();
+    if (Array.isArray(p.rangedDirs)) copy.rangedDirs = p.rangedDirs.slice();
+    if (p.equipped) copy.equipped = { ...p.equipped };
+    copy.id = '_dup_' + (++synth);
+    if (p.variant) copy.variant = p.variant;
+    return copy;
+  });
+  // Replace the selection with the floating-dup ids so the user sees the
+  // gold halo on the duplicate and group-drag logic treats it as one.
+  _builderUI.selectedIds = new Set(_builderUI.floatingDup.map(d => d.id));
+  sfx.uiToggle();
+  builderFlashHint('drag the duplicate to where you want it');
+  builderRefreshSelectionUI();
+  render();
+  builderTagZones();
+}
+
+// Commit the floating duplicate at its current positions. Off-board
+// pieces are dropped; on-board pieces that landed on existing pieces
+// fail the commit (already validated by the drag's hover state, but
+// double-check here as defense-in-depth). Returns the count actually
+// placed.
+function builderCommitFloatingDup() {
+  const dup = _builderUI.floatingDup;
+  if (!dup || dup.length === 0) return 0;
+  builderPushHistory();
+  const newIds = new Set();
+  let placed = 0, discarded = 0;
+  for (const d of dup) {
+    if (!inBounds(d.row, d.col)) { discarded++; continue; }
+    const occ = state.board[d.row][d.col];
+    if (occ) { discarded++; continue; } // shouldn't happen if drag validated correctly
+    _builderPlaceAt(d.row, d.col, d.owner, d.type, d.facing, d.variant);
+    const real = state.pieces.find(p => p.row === d.row && p.col === d.col);
+    if (real) { newIds.add(real.id); placed++; }
+  }
+  _builderUI.floatingDup = null;
+  _builderUI.selectedIds = newIds;
+  sfx.uiPlace();
+  if (discarded > 0) builderFlashHint('placed ' + placed + ' (' + discarded + ' off-edge)');
+  else builderFlashHint('placed ' + placed);
+  builderRefreshSelectionUI();
+  render();
+  builderTagZones();
+  return placed;
+}
+
+// Cancel the floating duplicate (e.g. user taps DUPLICATE again to abort,
+// or taps an empty cell that isn't a drag-drop). Restores selection to
+// the originals.
+function builderCancelFloatingDup() {
+  if (!_builderUI.floatingDup) return;
+  _builderUI.floatingDup = null;
+  _builderUI.selectedIds.clear();
+  builderRefreshSelectionUI();
+  render();
+  builderTagZones();
+}
+
+// Refresh the enabled/disabled state and labels of the multi-select
+// action buttons. Disabled buttons get dimmed; cursor stays "not-allowed"
+// so the user knows why nothing's happening on tap.
+function builderRefreshSelectionUI() {
+  const has = _builderUI.selectedIds.size > 0;
+  const isDup = !!(_builderUI.floatingDup && _builderUI.floatingDup.length > 0);
+  const setEnabled = (id, on) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.disabled = !on;
+    el.style.opacity = on ? '1' : '0.35';
+    el.style.cursor = on ? 'pointer' : 'not-allowed';
+  };
+  // 2.23: DUPLICATE is enabled when something is selected (and we're not
+  // already mid-duplicate — that'd be confusing; the existing dup needs
+  // to be committed or cancelled first). DELETE is enabled with any
+  // selection except a floating-dup selection (deleting a dup is the
+  // same as cancelling it).
+  setEnabled('builder-dup-btn',  has && !isDup);
+  setEnabled('builder-del-btn',  has && !isDup);
+  // 2.26/2.27: rotate buttons (in-place selection rotate) enabled with
+  // same rule as DELETE (selection exists, not mid-dup). The MIR-axis
+  // buttons next to MIRROR NOW (live mode-picker) have their own
+  // dimming logic driven by board squareness — not tied to selection.
+  const canTransform = has && !isDup;
+  setEnabled('builder-rot-ccw',  canTransform);
+  setEnabled('builder-rot-cw',   canTransform);
+  // 2.29: pivot button stays enabled regardless of selection (user may
+  // want to set pivot first, then select). But it's disabled while a
+  // floating dup is active — pivot picker would steal taps from the
+  // dup placement workflow.
+  setEnabled('builder-pivot-btn', !isDup);
+  // Show CANCEL DUP affordance: while a floating dup is active, the
+  // DUPLICATE button doubles as a cancel button.
+  const db = document.getElementById('builder-dup-btn');
+  if (db) {
+    db.classList.toggle('paste-armed', isDup);
+    db.textContent = isDup ? 'CANCEL DUP' : 'DUPLICATE';
+    if (isDup) { db.disabled = false; db.style.opacity = '1'; db.style.cursor = 'pointer'; }
+  }
+  // Selection-count label.
+  const hintEl = document.getElementById('builder-hint');
+  if (hintEl && !hintEl.dataset.flashing) {
+    if (isDup) hintEl.textContent = 'drag the duplicate · drop on-board to place, off-edge to discard';
+    else if (has) hintEl.textContent = _builderUI.selectedIds.size + ' selected · drag any to move group';
+    else hintEl.textContent = builderDefaultHint();
+  }
 }
 
 function builderHandleSquareClick(row, col) {
@@ -8208,12 +10102,61 @@ function builderHandleSquareClick(row, col) {
   const mirror = _builderUI.mirrorLive;
   const mirrorPos = builderMirrorPos(row, col);
 
-  // ERASE tool / no-tool tap on own piece -> remove. Mirror removes the
-  // mirrored cell's enemy piece (if any) when live mirror is on.
-  const isRemoveAction = (tool === 'erase') || (!tool && existing && existing.owner === side);
-  if (isRemoveAction) {
-    // Only snapshot if something will actually change. Tapping ERASE on
-    // an empty cell shouldn't waste a history slot.
+  // 2.19: SELECT tool — tapping a piece toggles its selection (foundation
+  // for Phase 2 group transforms). Empty cells with SELECT armed: do
+  // nothing (no longer destructive). Enemy and own pieces both
+  // selectable in editor since you control everything here.
+  // 2.23: a floating duplicate group "absorbs" taps on its own cells via
+  // the drag handlers (which always start drags from those cells). A
+  // tap on a cell that isn't part of the dup also cancels the dup —
+  // that means "I didn't mean to duplicate, get rid of it." Handle that
+  // before the normal SELECT logic so we don't try to also select the
+  // newly-tapped piece.
+  if (_builderUI.floatingDup && _builderUI.floatingDup.length > 0) {
+    const onDup = _builderUI.floatingDup.some(d => d.row === row && d.col === col);
+    if (!onDup) {
+      // Tap somewhere else with a floating dup active → cancel the dup.
+      builderCancelFloatingDup();
+      return;
+    }
+    // Tap on a dup cell with no drag → just keep the dup armed.
+    return;
+  }
+
+  if (tool === 'select') {
+    if (existing) {
+      // 2.22: toggle inclusion in the selection (multi-select). A piece
+      // already in the selection gets removed; a new one gets added.
+      // Phase 1's "tap = replace" behavior is now achievable with
+      // SELECT ALL → tap the one you want (or just clearing first).
+      if (_builderUI.selectedIds.has(existing.id)) {
+        _builderUI.selectedIds.delete(existing.id);
+      } else {
+        _builderUI.selectedIds.add(existing.id);
+      }
+      sfx.uiTap();
+      builderRefreshSelectionUI();
+      render();
+      builderTagZones();
+    } else {
+      // Tap on empty cell with SELECT armed: clear any current selection.
+      if (_builderUI.selectedIds.size > 0) {
+        _builderUI.selectedIds.clear();
+        sfx.uiTap();
+        builderRefreshSelectionUI();
+        render();
+        builderTagZones();
+      }
+    }
+    return;
+  }
+
+  // ERASE tool ONLY (2.19: was previously also triggered by no-tool +
+  // tap-on-own-piece, which made the default tool destructive — every
+  // accidental tap after entering the editor or loading a map erased
+  // a piece. Removed that branch; SELECT is now the default and erases
+  // require the explicit ERASE tool).
+  if (tool === 'erase') {
     const willRemoveOwn = !!(existing && existing.owner === side);
     const mirrorVictim = mirror ? state.pieces.find(p =>
       p.row === mirrorPos.row && p.col === mirrorPos.col && p.owner === otherSide) : null;
@@ -8227,7 +10170,10 @@ function builderHandleSquareClick(row, col) {
     return;
   }
 
-  // No tool armed and the cell is empty or holds an enemy piece — do nothing.
+  // No tool armed at all: do nothing. SELECT is now the default armed
+  // state after enterBuilder, so this branch is effectively only hit
+  // if the user deselected the current tool (no armed) — in which case
+  // a tap is just a no-op.
   if (!tool) return;
 
   // A unit type is armed. Validate placement zone first.
@@ -8256,7 +10202,8 @@ function builderHandleSquareClick(row, col) {
   // Place / replace on the active side. Push a history snapshot first so
   // undo can revert this tap (and the mirror it might trigger).
   builderPushHistory();
-  _builderPlaceAt(row, col, side, tool);
+  // 2.31: pass armedVariant so V2 units get spawned with their overrides.
+  _builderPlaceAt(row, col, side, tool, undefined, _builderUI.armedVariant);
   // 2.12: subtle click so a tap that lands has audible confirmation.
   // Fires once per user action (not for the mirrored placement) so a
   // single tap = a single click even with live mirror on.
@@ -8274,7 +10221,7 @@ function builderHandleSquareClick(row, col) {
     const inOtherZone = _builderUI.allowAnywhere ||
       (otherSide === PLAYER ? (mr >= halfBoundary) : (mr < halfBoundary));
     if (inBounds && inOtherZone) {
-      _builderPlaceAt(mr, mc, otherSide, tool, builderMirrorFacing(builderDefaultFacing(side)));
+      _builderPlaceAt(mr, mc, otherSide, tool, builderMirrorFacing(builderDefaultFacing(side)), _builderUI.armedVariant);
     }
   }
 
@@ -8296,9 +10243,11 @@ function builderFlashHint(msg) {
   }, 1400);
 }
 function builderDefaultHint() {
-  if (_builderUI.armed === 'erase') return 'tap to erase your pieces';
+  if (_builderUI.armed === 'select') return 'tap a piece to select · drag to move';
+  if (_builderUI.armed === 'erase')  return 'tap to erase your pieces';
+  if (_builderUI.armed === 'pivot')  return 'tap a grid intersection to set the pivot';
   if (_builderUI.armed)              return 'tap a square to place';
-  return 'tap an own piece to remove';
+  return 'pick a tool';
 }
 
 // Build the unit palette buttons. Each unit type from EXP_PIECE_DEFS gets
@@ -8307,38 +10256,79 @@ function builderRenderPalette() {
   const wrap = document.getElementById('builder-palette');
   if (!wrap) return;
   wrap.innerHTML = '';
-  const types = ['footman', 'knight', 'archer', 'berserker'];
-  for (const t of types) {
-    const def = pieceDefs()[t];
+  // 2.27: palette is 4 unit types. SELECT moved to the selection-action
+  // row. ERASE removed entirely — DELETE on a selection does the same job.
+  // 2.31: appended a 5th button for BERSERKER V2. This is a placeholder
+  // for the eventual per-unit variant sub-picker (see roadmap); when more
+  // V2s exist we'll redesign this row, but for now a flat button keeps
+  // the V2 piece reachable in the editor.
+  // Slot shape: { type, variant, label } — variant null means V1.
+  const slots = [
+    { type: 'footman',   variant: null, label: null },
+    { type: 'knight',    variant: null, label: null },
+    { type: 'archer',    variant: null, label: null },
+    { type: 'berserker', variant: null, label: null },
+    { type: 'berserker', variant: 'v2', label: 'BERS V2' },
+  ];
+  for (const sl of slots) {
+    const def = pieceDefs()[sl.type];
     if (!def) continue;
+    const isArmed = (_builderUI.armed === sl.type) && ((_builderUI.armedVariant || null) === (sl.variant || null));
     const btn = document.createElement('button');
-    btn.className = 'builder-palette-btn' + (_builderUI.armed === t ? ' armed' : '');
-    btn.dataset.unit = t;
-    btn.textContent = def.name;
+    btn.className = 'builder-palette-btn' + (isArmed ? ' armed' : '');
+    if (sl.variant === 'v2') btn.classList.add('v2');
+    btn.dataset.unit = sl.type;
+    if (sl.variant) btn.dataset.variant = sl.variant;
+    btn.textContent = sl.label || def.name;
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       sfx.uiTap();
-      _builderUI.armed = (_builderUI.armed === t) ? null : t;
+      const sameSlotArmed = (_builderUI.armed === sl.type) && ((_builderUI.armedVariant || null) === (sl.variant || null));
+      if (sameSlotArmed) {
+        // Toggle off
+        _builderUI.armed = null;
+        _builderUI.armedVariant = null;
+      } else {
+        _builderUI.armed = sl.type;
+        _builderUI.armedVariant = sl.variant || null;
+      }
+      _builderUI.selectedIds.clear();
       builderRenderPalette();
+      builderRefreshSelectBtn();
       document.getElementById('builder-hint').textContent = builderDefaultHint();
+      if (typeof builderRefreshSelectionUI === 'function') builderRefreshSelectionUI();
+      render();
+      builderTagZones();
     });
     wrap.appendChild(btn);
   }
-  const erase = document.createElement('button');
-  erase.className = 'builder-palette-btn' + (_builderUI.armed === 'erase' ? ' armed' : '');
-  erase.dataset.tool = 'erase';
-  erase.textContent = 'ERASE';
-  erase.addEventListener('click', (e) => {
-    e.stopPropagation();
-    sfx.uiTap();
-    _builderUI.armed = (_builderUI.armed === 'erase') ? null : 'erase';
-    builderRenderPalette();
-    document.getElementById('builder-hint').textContent = builderDefaultHint();
-  });
-  wrap.appendChild(erase);
+}
+
+// 2.27: standalone SELECT button now lives in the static HTML in the
+// select-action row. We just sync its armed state here when the tool
+// changes (called from palette button clicks and the select button's
+// own handler).
+function builderRefreshSelectBtn() {
+  const sel = document.getElementById('builder-sel-tool');
+  if (!sel) return;
+  sel.classList.toggle('armed', _builderUI.armed === 'select');
 }
 
 // Open the builder panel and prep state. `startMode` is 'empty' or 'default'.
+// 2.27: panel-height sync helper. Called on enter AND whenever the
+// panel's layout changes (e.g. user toggles the actions section).
+// The CSS var --builder-panel-height drives body padding so the board
+// area stays above whatever the panel takes up.
+function updateBuilderPanelHeight() {
+  const el = document.getElementById('builder-panel');
+  if (!el) return;
+  // Measure on the next frame to ensure layout is settled.
+  requestAnimationFrame(() => {
+    const h = el.getBoundingClientRect().height;
+    if (h > 0) document.documentElement.style.setProperty('--builder-panel-height', h + 'px');
+  });
+}
+
 function enterBuilder(startMode) {
   _builderActive = true;
   gameMode = 'experimental'; // builder uses the experimental rendering pipeline
@@ -8347,6 +10337,9 @@ function enterBuilder(startMode) {
   // shouldn't be able to undo all the way back into a previous one.
   _builderHistory.length = 0;
   _builderRedo.length = 0;
+  // 2.29: fresh editor session — no pivot, picker idle.
+  _builderUI.pivot = null;
+  if (_builderUI.armed === 'pivot') _builderUI.armed = 'select';
 
   // Init the underlying state so the board renders. We do this with a
   // tiny shortcut: queue a custom layout (or none) and call initState.
@@ -8394,15 +10387,29 @@ function enterBuilder(startMode) {
   // toggle button label so it shows '↕ FLIP'.
   _builderUI.mirrorMode = 'vertical';
   if (typeof window._refreshMirrorModeLabel === 'function') window._refreshMirrorModeLabel();
-  _builderUI.armed = null;
+  // 2.19: SELECT is the new default armed state. Previously this was
+  // null, which made "tap a piece" silently erase — a bug after every
+  // load. SELECT does nothing destructive and is the right starting
+  // point for the eventual multi-select / group-transform features.
+  _builderUI.armed = 'select';
+  _builderUI.selectedIds.clear();
+  // 2.23: reset Phase 2A state — floatingDup should not persist across
+  // editor sessions (would otherwise leave ghost overlays of pieces
+  // that no longer exist).
+  _builderUI.floatingDup = null;
   _builderUI.side = PLAYER;
   document.querySelectorAll('.builder-side-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.side === 'player');
   });
 
   builderRenderPalette();
+  // 2.27: sync the SELECT tool button armed state (it lives outside the
+  // palette now so builderRenderPalette doesn't paint it).
+  builderRefreshSelectBtn();
   // 2.14: sync the undo/redo dim state with the (empty) history stacks.
   builderRefreshUndoButtons();
+  // 2.22: sync selection button state too (everything starts disabled).
+  if (typeof builderRefreshSelectionUI === 'function') builderRefreshSelectionUI();
   const builderPanelEl = document.getElementById('builder-panel');
   builderPanelEl.style.display = 'block';
   // 2.06: after the panel is laid out, push its measured height into a
@@ -8417,8 +10424,7 @@ function enterBuilder(startMode) {
   // browsers). Calling redraw() here, after the panel is on-screen and
   // layout has settled, makes the tracks render properly.
   requestAnimationFrame(() => {
-    const h = builderPanelEl.getBoundingClientRect().height;
-    if (h > 0) document.documentElement.style.setProperty('--builder-panel-height', h + 'px');
+    updateBuilderPanelHeight();
     const _sl2 = window._builderSliders || {};
     for (const k of Object.keys(_sl2)) {
       if (_sl2[k] && typeof _sl2[k].redraw === 'function') _sl2[k].redraw();
@@ -8455,9 +10461,154 @@ function builderSnapshotLayout() {
     pieces: state.pieces.map(p => ({
       owner: p.owner, type: p.type,
       row: p.row, col: p.col,
-      facing: p.facing
+      facing: p.facing,
+      // 2.31: variant lives on the piece if it was spawned as a V2
+      variant: p.variant || null
     }))
   };
+}
+
+// ==========================================================================
+// 2.17: saved-map library (localStorage + file)
+// --------------------------------------------------------------------------
+// Each saved map is a JSON blob in this shape:
+//   { _format: 'breach.map', _version: 1,
+//     name, savedAt, layout: <builderSnapshotLayout()>,
+//     devPreset: <optional dev tuning preset>
+//   }
+// Locally-stored maps live under one localStorage key as a single JSON
+// array (simpler than per-name keys; trivial to enumerate and reorder).
+// File downloads use the same JSON shape so save/share/import are
+// symmetric.
+// ==========================================================================
+const _BUILDER_MAPS_KEY = 'breach.savedMaps.v1';
+const _BUILDER_MAPS_CAP = 50; // soft cap; older saves bumped if list grows past it
+
+function loadSavedMapList() {
+  try {
+    const raw = localStorage.getItem(_BUILDER_MAPS_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr;
+  } catch (_) { return []; }
+}
+function persistSavedMapList(list) {
+  try { localStorage.setItem(_BUILDER_MAPS_KEY, JSON.stringify(list)); }
+  catch (_) {}
+}
+// Build the full map blob from the current editor state. Includes the
+// dev preset only if the dev panel actually has any user-tuned values
+// (otherwise no point bloating the save). For now we always include the
+// preset and let the format flag mark it optional; future trimming is
+// easy.
+function buildCurrentMapBlob(name, opts) {
+  opts = opts || {};
+  const blob = {
+    _format: 'breach.map',
+    _version: 1,
+    name: name || 'unnamed map',
+    savedAt: new Date().toISOString(),
+    layout: builderSnapshotLayout(),
+  };
+  // 2.18: include the dev preset only when requested (defaults true).
+  // Skipping it makes the map "neutral" — loading it later applies
+  // whatever dev tuning the player has at that moment instead of
+  // overriding their balance.
+  const includeDev = (opts.includeDevPreset !== false);
+  if (includeDev && typeof window._brCaptureDevPreset === 'function') {
+    try {
+      const preset = window._brCaptureDevPreset();
+      if (preset) blob.devPreset = preset;
+    } catch (_) {}
+  }
+  return blob;
+}
+// Validate a candidate blob (from file or storage). Returns the same
+// shape we serialise out, or null if it doesn't smell right.
+function validateMapBlob(obj) {
+  if (!obj || typeof obj !== 'object') return null;
+  if (obj._format && obj._format !== 'breach.map') return null;
+  if (!obj.layout || !Array.isArray(obj.layout.pieces)) return null;
+  if (typeof obj.layout.rows !== 'number' || typeof obj.layout.cols !== 'number') return null;
+  return obj;
+}
+// Sanitize the filename portion of a user-provided name. Same rules the
+// dev panel SAVE PRESET modal uses — spaces to hyphens, strip anything
+// that isn't filesystem-safe, fall back to a timestamp.
+function builderSafeFilename(name) {
+  let s = (name || '').trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9._-]/g, '');
+  if (!s) {
+    const d = new Date();
+    s = 'breach-map-' + d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0') + '_' +
+      String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0');
+  }
+  return s;
+}
+function downloadMapBlob(blob) {
+  const fname = builderSafeFilename(blob.name) + '.breachmap';
+  const json = JSON.stringify(blob, null, 2);
+  const blobUrl = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+  const a = document.createElement('a');
+  a.href = blobUrl; a.download = fname;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+}
+// Save the current editor state under `name`. Overwrites an existing
+// save with the same name (case-insensitive match). Newest entries sit
+// at the front of the list so the picker shows recent maps first.
+function saveCurrentMap(name, opts) {
+  const blob = buildCurrentMapBlob(name, opts);
+  const list = loadSavedMapList();
+  const lower = (name || '').trim().toLowerCase();
+  // Remove any prior entry with the same name (case-insensitive).
+  const filtered = list.filter(m => (m.name || '').trim().toLowerCase() !== lower);
+  filtered.unshift(blob);
+  // Trim old saves beyond the cap.
+  while (filtered.length > _BUILDER_MAPS_CAP) filtered.pop();
+  persistSavedMapList(filtered);
+  return blob;
+}
+function deleteSavedMap(name) {
+  const list = loadSavedMapList();
+  const lower = (name || '').trim().toLowerCase();
+  const filtered = list.filter(m => (m.name || '').trim().toLowerCase() !== lower);
+  persistSavedMapList(filtered);
+}
+// Take a validated map blob and stage it into the builder. Applies the
+// dev preset first (if present and the dev panel is mounted), then sets
+// the layout into _pendingCustomLayout and re-inits state. Used by both
+// the LOAD list (localStorage) and the from-file picker.
+function applyMapBlobToBuilder(blob) {
+  const v = validateMapBlob(blob);
+  if (!v) return { ok: false, reason: 'invalid map' };
+  if (v.devPreset && typeof window._brApplyDevPreset === 'function') {
+    try { window._brApplyDevPreset(v.devPreset); } catch (_) {}
+  }
+  // Push a history entry so the user can undo a load.
+  if (_builderActive) builderPushHistory();
+  _pendingCustomLayout = {
+    rows: v.layout.rows,
+    cols: v.layout.cols,
+    playerCastleHp: v.layout.playerCastleHp,
+    enemyCastleHp:  v.layout.enemyCastleHp,
+    pieces: v.layout.pieces.map(p => ({ ...p }))
+  };
+  _builderUI.rows     = v.layout.rows;
+  _builderUI.cols     = v.layout.cols;
+  _builderUI.playerHp = v.layout.playerCastleHp;
+  _builderUI.enemyHp  = v.layout.enemyCastleHp;
+  initState();
+  const _sl = window._builderSliders || {};
+  if (_sl.rows)     _sl.rows.setValue(v.layout.rows);
+  if (_sl.cols)     _sl.cols.setValue(v.layout.cols);
+  if (_sl.playerHp) _sl.playerHp.setValue(v.layout.playerCastleHp);
+  if (_sl.enemyHp)  _sl.enemyHp.setValue(v.layout.enemyCastleHp);
+  render();
+  builderTagZones();
+  return { ok: true, blob: v };
 }
 
 // ==========================================================================
@@ -8561,7 +10712,15 @@ function builderRefreshUndoButtons() {
   const menuBtn = document.getElementById('menu-custom');
   const startModal = document.getElementById('builder-start-modal');
   if (menuBtn && startModal) {
-    menuBtn.addEventListener('click', () => { sfx.uiTap(); startModal.classList.add('show'); });
+    menuBtn.addEventListener('click', () => {
+      sfx.uiTap();
+      // Refresh the recent-saves shortcut every time the start modal opens
+      // so newly-saved maps show up without a page reload.
+      if (typeof window._builderRenderStartRecent === 'function') {
+        window._builderRenderStartRecent();
+      }
+      startModal.classList.add('show');
+    });
   }
 
   // 2.14: undo/redo buttons + keyboard shortcuts (Ctrl-Z / Ctrl-Y, and
@@ -8626,6 +10785,121 @@ function builderRefreshUndoButtons() {
     builderTagZones();
   });
 
+  // 2.22: Phase 2A — wire selection action buttons.
+  const _on = (id, fn) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
+  };
+  // 2.27: SELECT tool button. Toggles _builderUI.armed between 'select'
+  // and null. Clears selection when switching off SELECT (selection
+  // belongs to SELECT mode).
+  _on('builder-sel-tool',  () => {
+    sfx.uiTap();
+    _builderUI.armed = (_builderUI.armed === 'select') ? null : 'select';
+    if (_builderUI.armed !== 'select') _builderUI.selectedIds.clear();
+    builderRenderPalette();
+    builderRefreshSelectBtn();
+    document.getElementById('builder-hint').textContent = builderDefaultHint();
+    if (typeof builderRefreshSelectionUI === 'function') builderRefreshSelectionUI();
+    render();
+    builderTagZones();
+  });
+  _on('builder-sel-all',   () => { sfx.uiTap(); builderSelectAll(); });
+  _on('builder-sel-yours', () => { sfx.uiTap(); builderSelectAll(p => p.owner === PLAYER); });
+  _on('builder-sel-foe',   () => { sfx.uiTap(); builderSelectAll(p => p.owner === ENEMY); });
+  _on('builder-sel-none',  () => { sfx.uiTap(); builderClearSelection(); });
+  _on('builder-dup-btn',   () => {
+    // 2.23: doubles as CANCEL DUP while a floating duplicate is active.
+    if (_builderUI.floatingDup) builderCancelFloatingDup();
+    else builderDuplicateSelection();
+  });
+  _on('builder-del-btn',   () => builderDeleteSelection());
+  // 2.26: in-place rotation of the selection.
+  _on('builder-rot-ccw',   () => builderRotateSelection('ccw'));
+  _on('builder-rot-cw',    () => builderRotateSelection('cw'));
+
+  // 2.29: PIVOT button + intersection picker. Tap PIVOT to arm the
+  // picker; the next board tap snaps to the nearest grid intersection
+  // and sets the pivot there. Tapping an existing pivot's intersection
+  // while picker is armed clears it. Tap PIVOT again (while armed) to
+  // cancel the picker without changing the pivot.
+  function builderRefreshPivotBtn() {
+    const btn = document.getElementById('builder-pivot-btn');
+    if (!btn) return;
+    const picking = (_builderUI.armed === 'pivot');
+    const hasPivot = !!_builderUI.pivot;
+    btn.classList.toggle('armed', picking);
+    btn.textContent = hasPivot ? 'PIVOT ●' : 'PIVOT';
+  }
+  _on('builder-pivot-btn', () => {
+    // 2.30: three-state toggle.
+    //   Picker armed → cancel picker (preserves existing pivot if any)
+    //   Pivot set    → clear the pivot (user explicitly wants it off)
+    //   Neither      → arm picker
+    if (_builderUI.armed === 'pivot') {
+      _builderUI.armed = 'select';
+      sfx.uiToggle();
+      builderFlashHint('pivot picker cancelled');
+    } else if (_builderUI.pivot) {
+      _builderUI.pivot = null;
+      sfx.uiDeny();
+      builderFlashHint('pivot cleared');
+      render(); // remove the marker overlay
+    } else {
+      // Arm the picker. Preserve current selection — pivot picking
+      // shouldn't disturb selected pieces.
+      _builderUI.armed = 'pivot';
+      sfx.uiTap();
+      builderFlashHint('tap a grid intersection to set the pivot');
+    }
+    builderRefreshSelectBtn();
+    builderRefreshPivotBtn();
+    builderRefreshSelectionUI();
+  });
+
+  // Board-level pointerdown listener (capture phase) for pivot picks.
+  // Captures BEFORE per-cell handlers so we can intercept and prevent
+  // the drag/click pipeline from firing while picker is armed.
+  const boardForPivot = document.getElementById('board');
+  if (boardForPivot) {
+    boardForPivot.addEventListener('pointerdown', (e) => {
+      if (!_builderActive) return;
+      if (_builderUI.armed !== 'pivot') return;
+      // Suppress the cell-level handlers — we own this tap.
+      e.stopPropagation();
+      e.preventDefault();
+      // Compute nearest intersection from the tap position.
+      const rect = boardForPivot.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      const cellW = rect.width  / COLS;
+      const cellH = rect.height / ROWS;
+      const fRow = (e.clientY - rect.top)  / cellH;
+      const fCol = (e.clientX - rect.left) / cellW;
+      let Ir = Math.max(0, Math.min(ROWS, Math.round(fRow)));
+      let Ic = Math.max(0, Math.min(COLS, Math.round(fCol)));
+      // 2.30: simple set — no "same-intersection clears" branch.
+      // Clearing is done via the PIVOT button toggle now. (And the
+      // picker is never armed while a pivot is already set anyway.)
+      _builderUI.pivot = { Ir, Ic };
+      sfx.uiPlace();
+      builderFlashHint('pivot set · tap PIVOT again to clear');
+      // Disarm the picker; go back to SELECT mode so subsequent taps
+      // resume the normal selection workflow.
+      _builderUI.armed = 'select';
+      builderRefreshSelectBtn();
+      builderRefreshPivotBtn();
+      builderRefreshSelectionUI();
+      render();
+    }, true /* capture */);
+  }
+
+  // 2.27: the MIR ↕/↔/↘/↗ buttons that lived here in 2.26 were removed
+  // — they duplicated MIRROR NOW with different (replace-in-place)
+  // semantics. The user prefers MIRROR NOW's keep-originals behavior.
+  // Initial enable/disable sync.
+  builderRefreshSelectionUI();
+  builderRefreshPivotBtn();
+
   // 2.09: live-mirror checkbox.
   const mirrorCb = document.getElementById('builder-mirror-live');
   if (mirrorCb) mirrorCb.addEventListener('change', (e) => {
@@ -8658,7 +10932,7 @@ function builderRefreshUndoButtons() {
     for (const src of sourcePieces) {
       const mp = builderMirrorPos(src.row, src.col);
       if (mp.row < 0 || mp.row >= ROWS || mp.col < 0 || mp.col >= COLS) continue;
-      _builderPlaceAt(mp.row, mp.col, other, src.type, builderMirrorFacing(src.facing));
+      _builderPlaceAt(mp.row, mp.col, other, src.type, builderMirrorFacing(src.facing), src.variant);
     }
     render();
     builderTagZones();
@@ -8699,11 +10973,18 @@ function builderRefreshUndoButtons() {
     onFire: () => eraseSide(null)
   });
 
-  // 2.10: mirror MODE toggle (vertical ↕ ↔ rotate ⤾). Cycles between
-  // the two geometries; the button label reflects current mode.
+  // 2.10: mirror MODE toggle (vertical ↕ / rotate ⤾). Cycles between
+  // the two geometries; the button label reflects current mode. The
+  // name refreshMirrorModeLabel is exposed via window for other code
+  // paths (load/undo) to re-sync after state changes.
   const mirrorModeBtn = document.getElementById('builder-mirror-mode');
   function refreshMirrorModeLabel() {
     if (!mirrorModeBtn) return;
+    // 2.29: defensively coerce older saved-map modes ('diag1'/'diag2')
+    // back to 'vertical' since the diagonal modes were removed.
+    if (_builderUI.mirrorMode !== 'rotate' && _builderUI.mirrorMode !== 'vertical') {
+      _builderUI.mirrorMode = 'vertical';
+    }
     mirrorModeBtn.textContent = (_builderUI.mirrorMode === 'rotate') ? '⤾ ROTATE' : '↕ FLIP';
     mirrorModeBtn.title = (_builderUI.mirrorMode === 'rotate')
       ? 'Mirror rotates 180° (lower-right ↔ upper-left). Tap to switch.'
@@ -8760,61 +11041,42 @@ function builderRefreshUndoButtons() {
     }, 500);
   }
 
-  makeSlider('builder-rows-mount', 'rows', {
-    label: 'rows', min: 7, max: 12, step: 1,
-    color: '#a07a3a',
-    onChange: (n) => {
-      pushHistoryForSliderDrag('rows');
-      const keep = state.pieces.filter(p => p.row < n && p.col < _builderUI.cols);
-      _pendingCustomLayout = {
-        rows: n, cols: _builderUI.cols,
-        playerCastleHp: _builderUI.playerHp,
-        enemyCastleHp:  _builderUI.enemyHp,
-        pieces: keep.map(p => ({owner: p.owner, type: p.type, row: p.row, col: p.col, facing: p.facing}))
-      };
-      initState();
-      render();
-      builderTagZones();
-    }
-  });
-  makeSlider('builder-cols-mount', 'cols', {
-    label: 'cols', min: 6, max: 9, step: 1,
-    color: '#a07a3a',
-    onChange: (n) => {
-      pushHistoryForSliderDrag('cols');
-      const keep = state.pieces.filter(p => p.col < n && p.row < _builderUI.rows);
-      _pendingCustomLayout = {
-        rows: _builderUI.rows, cols: n,
-        playerCastleHp: _builderUI.playerHp,
-        enemyCastleHp:  _builderUI.enemyHp,
-        pieces: keep.map(p => ({owner: p.owner, type: p.type, row: p.row, col: p.col, facing: p.facing}))
-      };
-      initState();
-      render();
-      builderTagZones();
-    }
-  });
-  makeSlider('builder-player-hp-mount', 'playerHp', {
-    label: 'your HP', min: 5, max: 25, step: 1,
-    color: '#7fb3ff',
-    onChange: (n) => {
-      pushHistoryForSliderDrag('playerHp');
-      state.playerCastle = n; render();
-    }
-  });
-  makeSlider('builder-enemy-hp-mount', 'enemyHp', {
-    label: 'foe HP', min: 5, max: 25, step: 1,
-    color: '#f87171',
-    onChange: (n) => {
-      pushHistoryForSliderDrag('enemyHp');
-      state.enemyCastle = n; render();
-    }
-  });
+  // 2.27: editor's ROWS/COLS/HP sliders removed — those live in the dev
+  // panel's BOARD section now. The dev-panel rows/cols sliders use the
+  // "pending + APPLY" pattern (board resize is destructive), and the
+  // HP sliders apply live.
   // Expose for enterBuilder() to refresh on entry
   window._builderSliders = _builderSliders;
   window._refreshMirrorModeLabel = refreshMirrorModeLabel;
 
   // BACK: if there's any work to lose, ask via the game-styled modal;
+  // 2.27: bottom-actions toggle. Persists state in localStorage so the
+  // user's collapsed/expanded preference survives editor sessions.
+  // Default: expanded (PLAY is important — don't hide it by default).
+  const actionsToggle = document.getElementById('builder-actions-toggle');
+  const actionsWrap   = document.getElementById('builder-actions-wrap');
+  const ACTIONS_KEY   = 'breach.editor.actionsCollapsed.v1';
+  const applyActionsState = (collapsed) => {
+    if (!actionsToggle || !actionsWrap) return;
+    actionsToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    actionsWrap.classList.toggle('collapsed', collapsed);
+    // Re-measure panel height so body padding stays in sync.
+    if (typeof updateBuilderPanelHeight === 'function') updateBuilderPanelHeight();
+  };
+  // Initial state from storage.
+  let actionsCollapsed = false;
+  try { actionsCollapsed = localStorage.getItem(ACTIONS_KEY) === '1'; } catch (_) {}
+  applyActionsState(actionsCollapsed);
+  if (actionsToggle) {
+    actionsToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      actionsCollapsed = !actionsCollapsed;
+      sfx.uiToggle();
+      applyActionsState(actionsCollapsed);
+      try { localStorage.setItem(ACTIONS_KEY, actionsCollapsed ? '1' : '0'); } catch (_) {}
+    });
+  }
+
   // otherwise return to menu immediately. 2.07: switched from the
   // browser's native confirm() to a themed modal that matches the rest
   // of the editor's dialogs.
@@ -8857,6 +11119,265 @@ function builderRefreshUndoButtons() {
     exitBuilder(false);
     startGame('experimental');
   });
+
+  // ============================================================
+  // 2.17: SAVE / LOAD wiring
+  // ============================================================
+  // SAVE modal: name input + "also download" checkbox. Confirm stores
+  // to localStorage and (if checkbox is set) triggers a file download.
+  const saveModal       = document.getElementById('builder-save-modal');
+  const saveNameInput   = document.getElementById('builder-save-name');
+  const saveDownloadCb  = document.getElementById('builder-save-download');
+  const saveConfirmBtn  = document.getElementById('builder-save-confirm');
+  const saveCancelBtn   = document.getElementById('builder-save-cancel');
+  const openSaveModal = () => {
+    if (!saveModal) return;
+    if (saveNameInput) {
+      // Default the name to "Map N" where N continues from existing saves.
+      const list = loadSavedMapList();
+      const usedNums = new Set();
+      for (const m of list) {
+        const mm = (m.name || '').match(/^map\s+(\d+)$/i);
+        if (mm) usedNums.add(parseInt(mm[1], 10));
+      }
+      let n = 1;
+      while (usedNums.has(n)) n++;
+      saveNameInput.value = 'Map ' + n;
+      setTimeout(() => { saveNameInput.focus(); saveNameInput.select(); }, 60);
+    }
+    if (saveDownloadCb) saveDownloadCb.checked = true;
+    // 2.18: include-dev checkbox defaults ON each time the modal opens.
+    const _idc = document.getElementById('builder-save-include-dev');
+    if (_idc) _idc.checked = true;
+    saveModal.classList.add('show');
+  };
+  const closeSaveModal = () => saveModal && saveModal.classList.remove('show');
+  const saveBtn = document.getElementById('builder-save-btn');
+  if (saveBtn) saveBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sfx.uiTap();
+    // Need at least one piece to save — empty maps aren't useful.
+    if (!state.pieces || state.pieces.length === 0) {
+      builderFlashHint('place some pieces first');
+      sfx.uiDeny();
+      return;
+    }
+    openSaveModal();
+  });
+
+  // 2.18: DEV button — opens the existing dev panel so the user can tune
+  // unit stats while building. We can't use the original #dev-toggle
+  // button directly because it's hidden in builder-mode (intentionally —
+  // it would overlap the panel's bottom-right corner). Instead, mirror
+  // its click handler: flip the dev-panel between flex and none.
+  const devBtn = document.getElementById('builder-dev-btn');
+  if (devBtn) devBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sfx.uiTap();
+    const panel = document.getElementById('dev-panel');
+    if (!panel) return;
+    panel.style.display = (panel.style.display === 'flex') ? 'none' : 'flex';
+  });
+  if (saveCancelBtn) saveCancelBtn.addEventListener('click', () => { sfx.uiTap(); closeSaveModal(); });
+  if (saveModal) saveModal.addEventListener('click', (e) => {
+    if (e.target === saveModal) closeSaveModal();
+  });
+  // 2.18: cache the include-dev checkbox element. It defaults to checked
+  // each time the modal is opened (in openSaveModal).
+  const saveIncludeDevCb = document.getElementById('builder-save-include-dev');
+
+  function doSave() {
+    const rawName = (saveNameInput && saveNameInput.value || '').trim() || 'unnamed';
+    const includeDev = saveIncludeDevCb ? !!saveIncludeDevCb.checked : true;
+    sfx.uiCommit();
+    const blob = saveCurrentMap(rawName, { includeDevPreset: includeDev });
+    if (saveDownloadCb && saveDownloadCb.checked) downloadMapBlob(blob);
+    closeSaveModal();
+    builderFlashHint('saved: ' + rawName);
+  }
+  if (saveConfirmBtn) saveConfirmBtn.addEventListener('click', (e) => { e.stopPropagation(); doSave(); });
+  if (saveNameInput) saveNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); doSave(); }
+    else if (e.key === 'Escape') { closeSaveModal(); }
+  });
+
+  // ---- LOAD modal ----
+  const loadModal     = document.getElementById('builder-load-modal');
+  const loadListEl    = document.getElementById('builder-load-list');
+  const loadFileInput = document.getElementById('builder-load-file-input');
+  const loadFromFile  = document.getElementById('builder-load-from-file');
+  const loadCancelBtn = document.getElementById('builder-load-cancel');
+  const closeLoadModal = () => loadModal && loadModal.classList.remove('show');
+
+  // Build a single saved-map row for the LOAD picker. Tap to load; the
+  // small ✕ on the right deletes (after a single confirm tap because
+  // localStorage is silent — no file-system trash).
+  function renderSavedMapRow(m, opts) {
+    const inStart = !!(opts && opts.inStart);
+    const row = document.createElement('div');
+    row.style.cssText =
+      'display:flex; align-items:center; gap:8px; padding:8px 10px; margin:4px 0;' +
+      ' background:linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)),' +
+      ' repeating-linear-gradient(45deg, #1f1a14 0 3px, #1d1812 3px 6px);' +
+      ' border:1px solid #3a3024; border-radius:3px; cursor:pointer;' +
+      ' -webkit-tap-highlight-color: transparent;';
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1 1 auto; min-width:0; overflow:hidden;';
+    const name = document.createElement('div');
+    name.style.cssText = 'font-family:"Cinzel",serif; font-size:12px; font-weight:700; color:var(--gold); letter-spacing:0.08em; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;';
+    name.textContent = m.name || 'unnamed';
+    const meta = document.createElement('div');
+    meta.style.cssText = 'font-family:"JetBrains Mono",monospace; font-size:9px; color:var(--ink-dim); margin-top:2px; letter-spacing:0.04em;';
+    const pcCount = (m.layout && Array.isArray(m.layout.pieces)) ? m.layout.pieces.length : 0;
+    const dims = (m.layout) ? (m.layout.rows + '×' + m.layout.cols) : '?';
+    let when = '';
+    try {
+      const d = new Date(m.savedAt);
+      const today = new Date();
+      const sameDay = d.toDateString() === today.toDateString();
+      when = sameDay ? d.toTimeString().slice(0,5) : d.toLocaleDateString();
+    } catch (_) {}
+    meta.textContent = dims + ' · ' + pcCount + ' pcs' + (when ? ' · ' + when : '');
+    info.appendChild(name);
+    info.appendChild(meta);
+    row.appendChild(info);
+
+    // Delete button. In the start modal we omit delete (keep the modal
+    // simple); only the full LOAD picker offers delete.
+    if (!inStart) {
+      const del = document.createElement('button');
+      del.textContent = '✕';
+      del.title = 'Delete this saved map';
+      del.style.cssText =
+        'flex:0 0 auto; width:28px; height:28px; padding:0; border:1px solid #5a3030;' +
+        ' background:transparent; color:#d68574; font-size:14px; line-height:1; border-radius:2px;' +
+        ' cursor:pointer; -webkit-tap-highlight-color: transparent;';
+      // Two-tap delete: first tap arms (row tints red); second tap deletes.
+      // Resets after 2.5s of inactivity. Avoids a separate confirm modal.
+      let armed = false, armTimer = null;
+      del.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!armed) {
+          armed = true;
+          row.style.borderColor = '#a04848';
+          row.style.boxShadow = '0 0 8px rgba(248,113,113,0.35) inset';
+          del.textContent = 'sure?';
+          del.style.color = '#ffd4d4';
+          sfx.uiToggle();
+          armTimer = setTimeout(() => {
+            armed = false;
+            row.style.borderColor = '#3a3024';
+            row.style.boxShadow = '';
+            del.textContent = '✕';
+            del.style.color = '#d68574';
+          }, 2500);
+        } else {
+          if (armTimer) clearTimeout(armTimer);
+          sfx.uiDeny();
+          deleteSavedMap(m.name);
+          builderRenderSavedMapList();
+          builderRenderStartRecent();
+        }
+      });
+      row.appendChild(del);
+    }
+
+    row.addEventListener('click', () => {
+      sfx.uiTap();
+      if (inStart) {
+        // From the start modal: close start, hide menu, enter builder, then load.
+        document.getElementById('builder-start-modal').classList.remove('show');
+        document.getElementById('menu-overlay').classList.add('hidden');
+        enterBuilder('empty');
+        // enterBuilder leaves the board empty — now apply the map.
+        applyMapBlobToBuilder(m);
+      } else {
+        // From the in-editor LOAD modal: apply directly.
+        const r = applyMapBlobToBuilder(m);
+        if (r.ok) {
+          closeLoadModal();
+          builderFlashHint('loaded: ' + m.name);
+        } else {
+          builderFlashHint('load failed');
+          sfx.uiDeny();
+        }
+      }
+    });
+    return row;
+  }
+
+  function builderRenderSavedMapList() {
+    if (!loadListEl) return;
+    loadListEl.innerHTML = '';
+    const list = loadSavedMapList();
+    if (list.length === 0) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'padding:14px 10px; text-align:center; font-size:11px; color:var(--ink-dim); font-family:"JetBrains Mono",monospace; letter-spacing:0.04em;';
+      empty.textContent = 'No saved maps on this device yet. Use FROM FILE to import one.';
+      loadListEl.appendChild(empty);
+      return;
+    }
+    for (const m of list) loadListEl.appendChild(renderSavedMapRow(m, { inStart: false }));
+  }
+
+  // Render up-to-3 recent saves in the start-modal shortcut area.
+  function builderRenderStartRecent() {
+    const wrap = document.getElementById('builder-start-recent');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    const list = loadSavedMapList().slice(0, 3);
+    if (list.length === 0) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'flex';
+    const heading = document.createElement('div');
+    heading.style.cssText = 'font-size:9px; color:var(--ink-dim); letter-spacing:0.18em; padding:0 2px 2px; font-family:"JetBrains Mono",monospace;';
+    heading.textContent = 'RECENT';
+    wrap.appendChild(heading);
+    for (const m of list) wrap.appendChild(renderSavedMapRow(m, { inStart: true }));
+  }
+  window._builderRenderStartRecent = builderRenderStartRecent;
+
+  const loadBtn = document.getElementById('builder-load-btn');
+  if (loadBtn) loadBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sfx.uiTap();
+    builderRenderSavedMapList();
+    if (loadModal) loadModal.classList.add('show');
+  });
+  if (loadCancelBtn) loadCancelBtn.addEventListener('click', () => { sfx.uiTap(); closeLoadModal(); });
+  if (loadModal) loadModal.addEventListener('click', (e) => {
+    if (e.target === loadModal) closeLoadModal();
+  });
+
+  if (loadFromFile && loadFileInput) {
+    loadFromFile.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sfx.uiTap();
+      loadFileInput.click();
+    });
+    loadFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const obj = JSON.parse(ev.target.result);
+          const result = applyMapBlobToBuilder(obj);
+          if (result.ok) {
+            closeLoadModal();
+            builderFlashHint('loaded: ' + (result.blob.name || file.name));
+          } else {
+            builderFlashHint('invalid map file');
+            sfx.uiDeny();
+          }
+        } catch (_) {
+          builderFlashHint('invalid JSON');
+          sfx.uiDeny();
+        }
+        loadFileInput.value = ''; // allow re-loading the same file
+      };
+      reader.readAsText(file);
+    });
+  }
 })();
 // End custom-map editor wiring.
 
@@ -9313,6 +11834,16 @@ function builderRefreshUndoButtons() {
   window._brSliderHandle = _devDrawSliderHandle;
   window._brHexAlpha     = _devHexAlpha;
   window._brDarken       = _devDarken;
+  // 2.17: expose the dev-panel preset capture/apply helpers so the
+  // custom-map builder can bundle the current dev tuning into a saved
+  // map and re-apply it on load. Both functions are hoisted so this
+  // assignment runs fine before their declarations later in the IIFE.
+  window._brCaptureDevPreset = function() {
+    try { return captureCurrentSettings(); } catch (_) { return null; }
+  };
+  window._brApplyDevPreset = function(data) {
+    try { return applyPreset(data); } catch (e) { return { ok: false, reason: String(e) }; }
+  };
 
   // Compact slider row builder. `color` is optional and defaults to the
   // game's gold accent. Same registration shape as addSlider so saved
@@ -10038,6 +12569,33 @@ function builderRefreshUndoButtons() {
   bsRow.appendChild(bsApply);
   bsSec.appendChild(bsRow);
   refreshApplyState();
+
+  // 2.27: castle HP sliders moved from the editor panel into the dev
+  // panel's BOARD section. Live edits (no pending step needed — HP
+  // changes are safe to apply immediately, unlike board resize which
+  // can drop pieces). In editor mode, also mirrors into _builderUI so
+  // the value persists across re-renders and gets baked into the saved
+  // map's starting HP. During regular gameplay these sliders edit live
+  // castle HP (treat as a cheat/dev affordance — that's the whole point
+  // of the dev panel).
+  addSliderCompact(bsSec, 'player castle HP', 5, 25, 1, CASTLE_MAX_HP,
+    v => v.toFixed(0),
+    v => {
+      const n = Math.round(v);
+      state.playerCastle = n;
+      if (typeof _builderUI !== 'undefined' && _builderActive) _builderUI.playerHp = n;
+      render();
+    },
+    '#7fb3ff');
+  addSliderCompact(bsSec, 'foe castle HP', 5, 25, 1, CASTLE_MAX_HP,
+    v => v.toFixed(0),
+    v => {
+      const n = Math.round(v);
+      state.enemyCastle = n;
+      if (typeof _builderUI !== 'undefined' && _builderActive) _builderUI.enemyHp = n;
+      render();
+    },
+    '#f87171');
 
   // ---- HEALTH BAR ----
   const hp = makeSection('HEALTH BAR', false);
